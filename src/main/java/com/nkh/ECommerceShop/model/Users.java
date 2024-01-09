@@ -12,7 +12,7 @@ import lombok.Setter;
         uniqueConstraints = {
                 @UniqueConstraint(columnNames = "email")
         })
-public class _User {
+public class Users {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private long userId;
@@ -23,9 +23,9 @@ public class _User {
     @NotBlank
     private String password;
     @NotBlank
-    private ERole role;
+    private Role role;
 
-    public _User(String name, String email, String password, ERole role){
+    public Users(String name, String email, String password, Role role){
         this.name=name;
         this.email=email;
         this.password=password;
