@@ -1,6 +1,7 @@
 package com.nkh.ECommerceShop.security.jwt;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.JsonObject;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -28,14 +29,12 @@ public class AuthEntryPointJwt implements AuthenticationEntryPoint {
     response.setContentType(MediaType.APPLICATION_JSON_VALUE);
     response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
 
-    final Map<String, Object> body = new HashMap<>();
-    body.put("status", HttpServletResponse.SC_UNAUTHORIZED);
-    body.put("error", "Unauthorized");
-    body.put("message", authException.getMessage());
-    body.put("path", request.getServletPath());
+    JsonObject body = new JsonObject();
+    body.addProperty("status", HttpServletResponse.SC_UNAUTHORIZED);
+    body.addProperty("error", "Unauthorized");
+    body.addProperty("message", authException.getMessage());
+    body.addProperty("path", request.getServletPath());
 
-    final ObjectMapper mapper = new ObjectMapper();
-    mapper.writeValue(response.getOutputStream(), body);
+    response.getWriter().write(body.toString());
   }
-
 }
