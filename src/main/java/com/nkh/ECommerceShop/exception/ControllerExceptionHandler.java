@@ -37,6 +37,20 @@ public class ControllerExceptionHandler {
         return new ResponseEntity<>(message, HttpStatus.NOT_FOUND);
     }
 
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<ErrorMessage> handleValidationErrors(MethodArgumentNotValidException ex, WebRequest request) {
+        String errors = ex.getBindingResult().getFieldErrors()
+                .stream().map(FieldError::getDefaultMessage).collect(Collectors.joining(", "));
+        logger.error("Invalid input: " + errors);
+        logger.trace(Arrays.toString(ex.getStackTrace()));
+        ErrorMessage message = new ErrorMessage(
+                HttpStatus.BAD_REQUEST.value(),
+                new Date(),
+                "Invalid input: " + errors,
+                request.getDescription(false));
+        return new ResponseEntity<>(message,HttpStatus.BAD_REQUEST);
+    }
+
     @ExceptionHandler({ AuthenticationException.class })
     public ResponseEntity<ErrorMessage> handleAuthenticationException(Exception ex, WebRequest request) {
         logger.error("Unauthorized error: {}", ex.getMessage());

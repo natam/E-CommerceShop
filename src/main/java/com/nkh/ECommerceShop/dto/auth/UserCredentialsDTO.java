@@ -10,6 +10,9 @@ import org.springframework.validation.annotation.Validated;
 @Data
 @AllArgsConstructor
 public class UserCredentialsDTO {
+    @Email(message = "Should be provided valid email")
+    @NotBlank(message = "Email should be provided")
     private String email;
+    @NotBlank(message = "Password should be provided")
     private String password;
 }
