@@ -33,11 +33,11 @@ public class AuthController {
     public AuthController(AuthenticationManager authenticationManager,
                           UsersRepository usersRepository,
                           PasswordEncoder passwordEncoder,
-                          JwtUtils jwtUtils){
-        this.authenticationManager=authenticationManager;
+                          JwtUtils jwtUtils) {
+        this.authenticationManager = authenticationManager;
         this.userRepository = usersRepository;
-        this.encoder=passwordEncoder;
-        this.jwtUtils=jwtUtils;
+        this.encoder = passwordEncoder;
+        this.jwtUtils = jwtUtils;
     }
 
     @PostMapping("/signin")
