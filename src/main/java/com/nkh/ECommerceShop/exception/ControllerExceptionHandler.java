@@ -1,18 +1,10 @@
 package com.nkh.ECommerceShop.exception;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
-import com.google.gson.stream.JsonReader;
-import com.nkh.ECommerceShop.security.jwt.AuthEntryPointJwt;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -34,6 +26,19 @@ public class ControllerExceptionHandler {
                 request.getDescription(false));
 
         return new ResponseEntity<>(message, HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<ErrorMessage> handleValidationErrors(MethodArgumentNotValidException ex, WebRequest request) {
+        String errors = ex.getBindingResult().getFieldErrors()
+                .stream().map(FieldError::getDefaultMessage).collect(Collectors.joining(", "));
+        logger.error("Invalid input: " + errors);
+        ErrorMessage message = new ErrorMessage(
+                HttpStatus.BAD_REQUEST.value(),
+                new Date(),
+                "Invalid input: " + errors,
+                request.getDescription(false));
+        return new ResponseEntity<>(message,HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler({ AuthenticationException.class })
