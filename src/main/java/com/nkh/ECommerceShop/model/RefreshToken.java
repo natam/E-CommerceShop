@@ -6,7 +6,6 @@ import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
-import org.springframework.data.annotation.Id;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -25,7 +24,7 @@ public class RefreshToken {
     private long id;
 
     @OneToOne
-    @JoinColumn(name = "user_id", referencedColumnName = "id")
+    @JoinColumn(name = "userId", referencedColumnName = "id")
     private Users user;
 
     @NotBlank
@@ -36,8 +35,8 @@ public class RefreshToken {
     private Instant expiryDate;
 
     @CreationTimestamp
-    private LocalDateTime created_at;
+    private LocalDateTime createdAt;
 
     @UpdateTimestamp
-    private LocalDateTime updated_at;
+    private LocalDateTime updatedAt;
 }
