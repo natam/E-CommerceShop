@@ -5,7 +5,6 @@ import com.nkh.ECommerceShop.model.RefreshToken;
 import com.nkh.ECommerceShop.repository.RefreshTokenRepository;
 import com.nkh.ECommerceShop.repository.UsersRepository;
 import jakarta.transaction.Transactional;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -17,11 +16,7 @@ import java.util.UUID;
 public class RefreshTokenService {
     @Value("${app.auth.jwtRefreshExpirationMs}")
     private Long refreshTokenDurationMs;
-
-    @Autowired
     private final RefreshTokenRepository refreshTokenRepository;
-
-    @Autowired
     private final UsersRepository userRepository;
 
     public RefreshTokenService(RefreshTokenRepository refreshTokenRepository, UsersRepository userRepository) {

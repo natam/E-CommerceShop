@@ -17,7 +17,6 @@ import java.time.LocalDateTime;
                 @UniqueConstraint(columnNames = "token")
         })
 @NoArgsConstructor
-
 public class RefreshToken {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
