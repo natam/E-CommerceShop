@@ -9,6 +9,7 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.context.request.WebRequest;
 
 import java.util.*;
@@ -17,6 +18,7 @@ import java.util.stream.Collectors;
 @ControllerAdvice
 public class ControllerExceptionHandler {
     private static final Logger logger = LoggerFactory.getLogger(ControllerExceptionHandler.class);
+
     @ExceptionHandler(ResourceNotFoundException.class)
     public ResponseEntity<ErrorMessage> resourceNotFoundException(ResourceNotFoundException ex, WebRequest request) {
         logger.error("Resource not found: {}", ex.getMessage());
@@ -39,10 +41,10 @@ public class ControllerExceptionHandler {
                 new Date(),
                 "Invalid input: " + errors,
                 request.getDescription(false));
-        return new ResponseEntity<>(message,HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(message, HttpStatus.BAD_REQUEST);
     }
 
-    @ExceptionHandler({ AuthenticationException.class })
+    @ExceptionHandler({AuthenticationException.class})
     public ResponseEntity<ErrorMessage> handleAuthenticationException(Exception ex, WebRequest request) {
         logger.error("Unauthorized error: {}", ex.getMessage());
         ErrorMessage message = new ErrorMessage(
@@ -52,6 +54,16 @@ public class ControllerExceptionHandler {
                 request.getDescription(false));
 
         return new ResponseEntity<ErrorMessage>(message, HttpStatus.UNAUTHORIZED);
+    }
+
+    @ExceptionHandler(value = TokenRefreshException.class)
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    public ErrorMessage handleTokenRefreshException(TokenRefreshException ex, WebRequest request) {
+        return new ErrorMessage(
+                HttpStatus.FORBIDDEN.value(),
+                new Date(),
+                ex.getMessage(),
+                request.getDescription(false));
     }
 
     @ExceptionHandler(Exception.class)
