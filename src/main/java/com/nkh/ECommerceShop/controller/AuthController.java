@@ -1,8 +1,13 @@
 package com.nkh.ECommerceShop.controller;
 
+import com.nkh.ECommerceShop.dto.auth.TokenRefreshRequestDTO;
+import com.nkh.ECommerceShop.dto.auth.TokenRefreshResponseDTO;
 import com.nkh.ECommerceShop.dto.auth.UserCredentialsDTO;
+import com.nkh.ECommerceShop.exception.TokenRefreshException;
+import com.nkh.ECommerceShop.model.RefreshToken;
 import com.nkh.ECommerceShop.repository.UsersRepository;
 import com.nkh.ECommerceShop.security.jwt.JwtUtils;
+import com.nkh.ECommerceShop.security.service.RefreshTokenService;
 import com.nkh.ECommerceShop.security.service.UserDetailsImpl;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,29 +17,32 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
     private final AuthenticationManager authenticationManager;
+
+    private final RefreshTokenService refreshTokenService;
     private final UsersRepository userRepository;
     private final PasswordEncoder encoder;
     private final JwtUtils jwtUtils;
 
     @Autowired
     public AuthController(AuthenticationManager authenticationManager,
+                          RefreshTokenService refreshTokenService,
                           UsersRepository usersRepository,
                           PasswordEncoder passwordEncoder,
                           JwtUtils jwtUtils) {
         this.authenticationManager = authenticationManager;
+        this.refreshTokenService = refreshTokenService;
         this.userRepository = usersRepository;
         this.encoder = passwordEncoder;
         this.jwtUtils = jwtUtils;
@@ -42,7 +50,6 @@ public class AuthController {
 
     @PostMapping("/signin")
     public ResponseEntity<?> authenticateUser(@RequestBody @Valid UserCredentialsDTO loginRequest) {
-
         Authentication authentication = authenticationManager
                 .authenticate(new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword()));
 
@@ -53,10 +60,26 @@ public class AuthController {
         ResponseCookie jwtCookie = jwtUtils.generateJwtCookie(userDetails);
 
         List<String> roles = userDetails.getAuthorities().stream()
-                .map(item -> item.getAuthority())
-                .collect(Collectors.toList());
+                .map(GrantedAuthority::getAuthority)
+                .toList();
+        RefreshToken refreshToken = refreshTokenService.createRefreshToken(userDetails.getId());
 
         return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE, jwtCookie.toString())
                 .body("You are logged in successfully");
+    }
+
+    @PostMapping("/refreshtoken")
+    public ResponseEntity<?> refreshtoken(@Valid @RequestBody TokenRefreshRequestDTO request) {
+        String requestRefreshToken = request.getRefreshToken();
+
+        return refreshTokenService.findByToken(requestRefreshToken)
+                .map(refreshTokenService::verifyExpiration)
+                .map(RefreshToken::getUser)
+                .map(user -> {
+                    String token = jwtUtils.generateTokenFromUsername(user.getEmail());
+                    return ResponseEntity.ok(new TokenRefreshResponseDTO(token, requestRefreshToken));
+                })
+                .orElseThrow(() -> new TokenRefreshException(requestRefreshToken,
+                        "Refresh token is not in database!"));
     }
 }
