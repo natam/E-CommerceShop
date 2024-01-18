@@ -19,15 +19,17 @@ import java.util.Date;
 @Component
 public class JwtUtils {
   private static final Logger logger = LoggerFactory.getLogger(JwtUtils.class);
+  private final String jwtSecret;
+  private final int jwtExpirationMs;
+  private final String jwtCookie;
 
-  @Value("${app.auth.secret}")
-  private String jwtSecret;
-
-  @Value("${app.auth.jwtExpirationMs}")
-  private int jwtExpirationMs;
-
-  @Value("${app.auth.jwtCookieName}")
-  private String jwtCookie;
+  public JwtUtils(@Value("${app.auth.jwtCookieName}") String jwtCookie,
+                  @Value("${app.auth.jwtExpirationMs}") int jwtExpirationMs,
+                  @Value("${app.auth.secret}") String jwtSecret){
+    this.jwtCookie = jwtCookie;
+    this.jwtExpirationMs = jwtExpirationMs;
+    this.jwtSecret = jwtSecret;
+  }
 
   public String getJwtFromCookies(HttpServletRequest request) {
     Cookie cookie = WebUtils.getCookie(request, jwtCookie);
