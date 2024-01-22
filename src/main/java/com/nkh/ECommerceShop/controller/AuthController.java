@@ -1,10 +1,14 @@
 package com.nkh.ECommerceShop.controller;
 
+import com.nkh.ECommerceShop.dto.auth.RegistrationRequestDTO;
 import com.nkh.ECommerceShop.dto.auth.TokenRefreshRequestDTO;
 import com.nkh.ECommerceShop.dto.auth.TokenRefreshResponseDTO;
 import com.nkh.ECommerceShop.dto.auth.UserCredentialsDTO;
+import com.nkh.ECommerceShop.exception.ErrorMessage;
 import com.nkh.ECommerceShop.exception.TokenRefreshException;
 import com.nkh.ECommerceShop.model.RefreshToken;
+import com.nkh.ECommerceShop.model.Role;
+import com.nkh.ECommerceShop.model.Users;
 import com.nkh.ECommerceShop.repository.UsersRepository;
 import com.nkh.ECommerceShop.security.jwt.JwtUtils;
 import com.nkh.ECommerceShop.security.service.RefreshTokenService;
@@ -22,7 +26,11 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
+import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
@@ -66,6 +74,22 @@ public class AuthController {
 
         return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE, jwtCookie.toString())
                 .body("You are logged in successfully");
+    }
+
+    @PostMapping("/signup")
+    public ResponseEntity<?> registerUser(@Valid @RequestBody RegistrationRequestDTO signUpRequest) {
+
+        if (userRepository.existsByEmail(signUpRequest.getEmail())) {
+            ErrorMessage errorMessage = new ErrorMessage(400, new Date(), "Error: Email is already in use!", "");
+            return ResponseEntity.badRequest().body(errorMessage);
+        }
+        // Create new user's account
+        Users user = new Users(signUpRequest.getName(),
+                signUpRequest.getEmail(),
+                encoder.encode(signUpRequest.getPassword()), Role.USER);
+        userRepository.save(user);
+
+        return ResponseEntity.ok("User registered successfully!");
     }
 
     @PostMapping("/refreshtoken")
