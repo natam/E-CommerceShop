@@ -24,7 +24,6 @@ public class Users {
     private String email;
     @NotBlank
     private String password;
-    @NotBlank
     @Enumerated(EnumType.STRING)
     private Role role;
 
