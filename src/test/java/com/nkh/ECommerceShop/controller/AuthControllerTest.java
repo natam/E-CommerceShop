@@ -128,7 +128,7 @@ class AuthControllerTest {
                 .andExpect(cookie().exists("nkh"))
                 .andExpect(content()
                         .contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("roles", is(List.of(Role.USER))))
+                .andExpect(jsonPath("roles", is(List.of(Role.USER.name()))))
                 .andExpect(jsonPath("refreshToken", notNullValue()))
                 .andExpect(jsonPath("accessToken", notNullValue()))
                 .andExpect(jsonPath("user", is(email)));
