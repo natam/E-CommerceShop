@@ -1,9 +1,7 @@
 package com.nkh.ECommerceShop.controller;
 
-import com.nkh.ECommerceShop.dto.auth.RegistrationRequestDTO;
-import com.nkh.ECommerceShop.dto.auth.TokenRefreshRequestDTO;
-import com.nkh.ECommerceShop.dto.auth.TokenRefreshResponseDTO;
-import com.nkh.ECommerceShop.dto.auth.UserCredentialsDTO;
+import com.nkh.ECommerceShop.dto.MessageResponseDTO;
+import com.nkh.ECommerceShop.dto.auth.*;
 import com.nkh.ECommerceShop.exception.ErrorMessage;
 import com.nkh.ECommerceShop.exception.TokenRefreshException;
 import com.nkh.ECommerceShop.model.RefreshToken;
@@ -26,11 +24,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDateTime;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
@@ -70,10 +65,12 @@ public class AuthController {
         List<String> roles = userDetails.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
                 .toList();
+
         RefreshToken refreshToken = refreshTokenService.createRefreshToken(userDetails.getId());
+        AccessTokenDTO responseBody = new AccessTokenDTO(userDetails.getUsername(), roles, jwtCookie.getValue(), refreshToken.getToken(), jwtCookie.getMaxAge().toString());
 
         return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE, jwtCookie.toString())
-                .body("You are logged in successfully");
+                .body(responseBody);
     }
 
     @PostMapping("/signup")
@@ -89,7 +86,7 @@ public class AuthController {
                 encoder.encode(signUpRequest.getPassword()), Role.USER);
         userRepository.save(user);
 
-        return ResponseEntity.ok("User registered successfully!");
+        return ResponseEntity.ok(new MessageResponseDTO("User registered successfully!"));
     }
 
     @PostMapping("/refreshtoken")
