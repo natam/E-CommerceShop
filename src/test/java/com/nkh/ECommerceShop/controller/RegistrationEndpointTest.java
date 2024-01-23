@@ -173,6 +173,6 @@ public class RegistrationEndpointTest {
                 .andExpect(status().isOk())
                 .andExpect(content()
                         .contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
-                .andExpect(content().string("User registered successfully!"));
+                .andExpect(jsonPath("message", is("User registered successfully!")));
     }
 }
