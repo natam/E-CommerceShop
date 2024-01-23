@@ -33,6 +33,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -41,6 +42,7 @@ import static org.hamcrest.Matchers.notNullValue;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 
 @RunWith(SpringRunner.class)
 @WebMvcTest(value = AuthController.class, includeFilters = {
@@ -111,10 +113,11 @@ class AuthControllerTest {
 
     @Test
     void givenValidCredentials_ReturnAuthCookie() throws Exception {
-        Users user = new Users("test", "test@gmail.com", encoder.encode("password"), Role.USER);
+        String email = "test@gmail.com";
+        Users user = new Users("test", email, encoder.encode("password"), Role.USER);
+        UserCredentialsDTO credentials = new UserCredentialsDTO(email, "password");
         given(userDetailsService.loadUserByUsername("test@gmail.com"))
                 .willReturn(UserDetailsImpl.build(user));
-        UserCredentialsDTO credentials = new UserCredentialsDTO("test@gmail.com", "password");
         Gson gson = new Gson();
         ResultActions perform = mvc.perform(
                         post("/api/auth/signin")
@@ -125,7 +128,10 @@ class AuthControllerTest {
                 .andExpect(cookie().exists("nkh"))
                 .andExpect(content()
                         .contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
-                .andExpect(content().string("You are logged in successfully"));
+                .andExpect(jsonPath("roles", is(List.of(Role.USER))))
+                .andExpect(jsonPath("refreshToken", notNullValue()))
+                .andExpect(jsonPath("accessToken", notNullValue()))
+                .andExpect(jsonPath("user", is(email)));
     }
 
     @Test
