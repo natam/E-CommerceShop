@@ -1,5 +1,6 @@
 package com.nkh.ECommerceShop.controller;
 
+import com.nkh.ECommerceShop.dto.MessageResponseDTO;
 import com.nkh.ECommerceShop.model.Product;
 import com.nkh.ECommerceShop.repository.ProductsRepository;
 import com.nkh.ECommerceShop.service.ProductsService;
@@ -33,5 +34,19 @@ public class ProductsController {
                                                  @RequestBody Product product){
         Product updatedProduct = productsService.updateProduct(id, product);
         return ResponseEntity.ok().body(updatedProduct);
+    }
+
+    @GetMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
+    public ResponseEntity<Product> getProduct(@PathVariable("id") long id){
+        Product foundProduct = productsService.getById(id);
+        return ResponseEntity.ok().body(foundProduct);
+    }
+
+    @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<MessageResponseDTO> deleteProduct(@PathVariable("id") long id){
+        productsService.deleteProduct(id);
+        return ResponseEntity.ok().body(new MessageResponseDTO(String.format("Product with id %d was deleted", id)));
     }
 }
