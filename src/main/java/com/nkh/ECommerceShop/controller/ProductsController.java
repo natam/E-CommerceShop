@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
-@RequestMapping("/api/v1")
+@RequestMapping("/api/v1/products")
 public class ProductsController {
     private final ProductsService productsService;
     private final ProductsRepository productsRepository;
@@ -20,10 +20,18 @@ public class ProductsController {
         this.productsService = productsService;
     }
 
-    @PostMapping("/products")
+    @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Product> addProduct(@RequestBody Product product){
         Product addedProduct = productsService.createProduct(product);
         return ResponseEntity.ok().body(addedProduct);
+    }
+
+    @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Product> updateProduct(@PathVariable("id") long id,
+                                                 @RequestBody Product product){
+        Product updatedProduct = productsService.updateProduct(id, product);
+        return ResponseEntity.ok().body(updatedProduct);
     }
 }
