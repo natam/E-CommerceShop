@@ -3,9 +3,6 @@ package com.nkh.ECommerceShop.service;
 import com.nkh.ECommerceShop.exception.AlreadyExistsException;
 import com.nkh.ECommerceShop.exception.ResourceNotFoundException;
 import com.nkh.ECommerceShop.model.Product;
-import com.nkh.ECommerceShop.model.RefreshToken;
-import com.nkh.ECommerceShop.model.Role;
-import com.nkh.ECommerceShop.model.Users;
 import com.nkh.ECommerceShop.repository.ProductsRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -13,12 +10,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-
-import java.time.Instant;
 import java.util.Optional;
-import java.util.UUID;
-
 import static org.junit.jupiter.api.Assertions.*;
+
 @ExtendWith(MockitoExtension.class)
 class ProductsServiceTest {
     @Mock
@@ -115,7 +109,7 @@ class ProductsServiceTest {
     }
 
     @Test
-    void givenProductNotExistInDB_TrowExceptionOnDelete() {
+    void givenProductNotExistInDB_ThrowExceptionOnDelete() {
         long productId = 1L;
         Mockito.when(productsRepository.findById(productId)).thenReturn(Optional.empty());
         Exception exception = assertThrows(ResourceNotFoundException.class,
