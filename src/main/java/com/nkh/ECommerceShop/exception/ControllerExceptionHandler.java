@@ -31,7 +31,7 @@ public class ControllerExceptionHandler {
         return new ResponseEntity<>(message, HttpStatus.NOT_FOUND);
     }
 
-    @ExceptionHandler({AlreadyExistsException.class})
+    @ExceptionHandler(AlreadyExistsException.class)
     public ResponseEntity<ErrorMessage> alreadyExistsException(AlreadyExistsException ex, WebRequest request) {
         logger.error("Already exists: {}", ex.getMessage());
         ErrorMessage message = new ErrorMessage(
@@ -56,7 +56,7 @@ public class ControllerExceptionHandler {
         return new ResponseEntity<>(message, HttpStatus.BAD_REQUEST);
     }
 
-    @ExceptionHandler(value = TokenRefreshException.class)
+    @ExceptionHandler(TokenRefreshException.class)
     public ResponseEntity<ErrorMessage> handleTokenRefreshException(TokenRefreshException ex, WebRequest request) {
         logger.error("Refresh Token Error: {}", ex.getMessage());
         ErrorMessage message = new ErrorMessage(
@@ -79,7 +79,7 @@ public class ControllerExceptionHandler {
         return new ResponseEntity<ErrorMessage>(message, HttpStatus.UNAUTHORIZED);
     }
 
-    @ExceptionHandler({ AccessDeniedException.class })
+    @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity<ErrorMessage> handleAccessDeniedException(
             AccessDeniedException ex, WebRequest request) {
         logger.error("Access denied error: {}", ex.getMessage());
