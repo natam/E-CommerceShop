@@ -40,7 +40,8 @@ public class ProductsService {
     }
 
     @Transactional
-    public void deleteProduct(long id){
+    public boolean deleteProduct(long id){
         repository.delete(getById(id));
+        return true;
     }
 }
