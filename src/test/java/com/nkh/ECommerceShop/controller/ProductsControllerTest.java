@@ -6,6 +6,7 @@ import com.nkh.ECommerceShop.exception.ResourceNotFoundException;
 import com.nkh.ECommerceShop.model.Product;
 import com.nkh.ECommerceShop.model.Role;
 import com.nkh.ECommerceShop.model.Users;
+import com.nkh.ECommerceShop.repository.ProductsRepository;
 import com.nkh.ECommerceShop.security.WebSecurityConfig;
 import com.nkh.ECommerceShop.security.jwt.AuthEntryPointJwt;
 import com.nkh.ECommerceShop.security.jwt.JwtUtils;
@@ -44,7 +45,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class ProductsControllerTest {
     @Autowired
     private MockMvc mvc;
-
+    @MockBean
+    ProductsRepository productsRepository;
     @Autowired
     JwtUtils jwtUtils;
     @MockBean
