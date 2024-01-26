@@ -1,10 +1,12 @@
 package com.nkh.ECommerceShop.controller;
 
 import com.nkh.ECommerceShop.dto.MessageResponseDTO;
+import com.nkh.ECommerceShop.dto.ProductsPageDTO;
 import com.nkh.ECommerceShop.model.Product;
 import com.nkh.ECommerceShop.service.ProductsService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -45,5 +47,20 @@ public class ProductsController {
     public ResponseEntity<MessageResponseDTO> deleteProduct(@PathVariable("id") long id){
         productsService.deleteProduct(id);
         return ResponseEntity.ok().body(new MessageResponseDTO(String.format("Product with id %d was deleted", id)));
+    }
+
+    @GetMapping
+    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
+    public ResponseEntity<ProductsPageDTO> getProducts(@RequestParam(defaultValue = "0") int page,
+                                                     @RequestParam(defaultValue = "3") int size){
+        ProductsPageDTO productsResponse = new ProductsPageDTO();
+        Page<Product> products = productsService.getAllProducts(page,size);
+        productsResponse.setProducts(products.getContent());
+        productsResponse.setLimit(size);
+        productsResponse.setTotalPages(products.getTotalPages());
+        productsResponse.setTotalProducts(products.getTotalElements());
+        productsResponse.setCurrentPage(products.getPageable().getPageNumber());
+        productsResponse.setOffset(products.getPageable().getOffset());
+        return ResponseEntity.ok().body(productsResponse);
     }
 }
