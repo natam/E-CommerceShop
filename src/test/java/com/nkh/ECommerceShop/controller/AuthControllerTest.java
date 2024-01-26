@@ -114,10 +114,15 @@ class AuthControllerTest {
     @Test
     void givenValidCredentials_ReturnAuthCookie() throws Exception {
         String email = "test@gmail.com";
+        long userId = 1L;
         Users user = new Users("test", email, encoder.encode("password"), Role.USER);
+        user.setId(userId);
         UserCredentialsDTO credentials = new UserCredentialsDTO(email, "password");
         given(userDetailsService.loadUserByUsername("test@gmail.com"))
                 .willReturn(UserDetailsImpl.build(user));
+        RefreshToken refreshToken = new RefreshToken();
+        refreshToken.setToken(UUID.randomUUID().toString());
+        given(tokenService.createRefreshToken(userId)).willReturn(refreshToken);
         Gson gson = new Gson();
         ResultActions perform = mvc.perform(
                         post("/api/auth/signin")
