@@ -1,6 +1,5 @@
 package com.nkh.ECommerceShop.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -9,7 +8,7 @@ import lombok.NoArgsConstructor;
 @Data
 @Table(name = "cartProducts")
 @NoArgsConstructor
-public class CartProducts {
+public class CartProduct {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
@@ -18,4 +17,10 @@ public class CartProducts {
     @JoinColumn(name = "productId")
     private Product product;
     private int productQuantity;
+
+    public CartProduct(long cartId, Product product, int productQuantity){
+        this.cartId=cartId;
+        this.product = product;
+        this.productQuantity = productQuantity;
+    }
 }

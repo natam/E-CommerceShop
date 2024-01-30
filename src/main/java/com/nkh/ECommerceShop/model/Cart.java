@@ -1,6 +1,5 @@
 package com.nkh.ECommerceShop.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -22,13 +21,13 @@ public class Cart {
     private long userId;
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JoinColumn(name = "cartId")
-    private Set<CartProducts> cartProducts = new HashSet<CartProducts>();;
+    private Set<CartProduct> cartProducts = new HashSet<CartProduct>();;
     private double totalCartProductsPrice;
     @CreationTimestamp
     private LocalDateTime createdAt;
     @UpdateTimestamp
     private LocalDateTime updatedAt;
-    public Cart(long userId, Set<CartProducts> cartProducts){
+    public Cart(long userId, Set<CartProduct> cartProducts){
         this.userId = userId;
         this.cartProducts = cartProducts;
         if(cartProducts.isEmpty()){
@@ -36,7 +35,7 @@ public class Cart {
         }else {
             totalCartProductsPrice = cartProducts
                     .stream()
-                    .mapToDouble(cartProducts1 -> cartProducts1.getProduct().getPrice() * cartProducts1.getProductQuantity())
+                    .mapToDouble(cartProduct1 -> cartProduct1.getProduct().getPrice() * cartProduct1.getProductQuantity())
                     .reduce(0.00, Double::sum);
         }
     }

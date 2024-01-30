@@ -1,7 +1,7 @@
 package com.nkh.ECommerceShop.repository;
 
-import com.nkh.ECommerceShop.model.CartProducts;
+import com.nkh.ECommerceShop.model.CartProduct;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface CartsProductsRepository extends JpaRepository<CartProducts, Long> {
+public interface CartsProductsRepository extends JpaRepository<CartProduct, Long> {
 }
