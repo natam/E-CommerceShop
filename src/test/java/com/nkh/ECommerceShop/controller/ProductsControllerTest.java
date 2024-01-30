@@ -4,25 +4,17 @@ import com.google.gson.*;
 import com.nkh.ECommerceShop.exception.AlreadyExistsException;
 import com.nkh.ECommerceShop.exception.ResourceNotFoundException;
 import com.nkh.ECommerceShop.model.Product;
-import com.nkh.ECommerceShop.model.Role;
-import com.nkh.ECommerceShop.model.Users;
 import com.nkh.ECommerceShop.repository.ProductsRepository;
 import com.nkh.ECommerceShop.security.WebSecurityConfig;
 import com.nkh.ECommerceShop.security.jwt.AuthEntryPointJwt;
 import com.nkh.ECommerceShop.security.jwt.AuthTokenFilter;
 import com.nkh.ECommerceShop.security.jwt.JwtUtils;
-import com.nkh.ECommerceShop.security.service.UserDetailsImpl;
 import com.nkh.ECommerceShop.security.service.UserDetailsServiceImpl;
 import com.nkh.ECommerceShop.service.ProductsService;
-import jakarta.servlet.http.Cookie;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.ComponentScan;
@@ -34,31 +26,29 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
-
-import java.lang.reflect.Array;
 import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
+import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.BDDMockito.willThrow;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-
-@WebMvcTest(value = ProductsController.class)
+@WebMvcTest(value = ProductsController.class, includeFilters = {
+        @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, classes={AuthEntryPointJwt.class})})
+@Import(WebSecurityConfig.class)
 class ProductsControllerTest {
-    @MockBean
-    private SecurityContext securityContext;
     @Autowired
     private MockMvc mvc;
+    @Autowired
+    AuthEntryPointJwt authEntryPointJwt;
     @MockBean
     ProductsRepository productsRepository;
     @MockBean
@@ -85,7 +75,7 @@ class ProductsControllerTest {
     }
 
     @Test
-    @WithMockUser(roles = "ADMIN")
+    @WithMockUser(authorities = "ADMIN")
     void givenAdminAndValidProduct_Return200OnCreate() throws Exception {
         Product product = new Product("product1", "testing product", 5.50, 5);
         given(productsService.createProduct(product)).willReturn(product);
@@ -102,7 +92,7 @@ class ProductsControllerTest {
     }
 
     @Test
-    @WithMockUser(username = "test@gmail.com", roles = "ADMIN")
+    @WithMockUser(authorities = "ADMIN")
     void givenProductWithNameAndPriceExistingInDB_ReturnError400() throws Exception {
         Product product = new Product("product1", "testing product", 5.50, 5);
         String errorMessage = String.format("Product with name %s and price %f already exists",
@@ -122,15 +112,17 @@ class ProductsControllerTest {
     }
 
     @Test
-    @WithMockUser(username = "test@gmail.com",roles = "USER")
+    @WithMockUser(authorities = "USER")
     void givenCreateValidProductAsUser_ReturnError403OnCreate() throws Exception {
         Product product = new Product("product1", "testing product", 5.50, 5);
         mvc.perform(
                 post("/api/v1/products")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(gson.toJson(product))
-                        .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isForbidden());
+                        .accept(MediaType.APPLICATION_JSON)
+                        .with(csrf()))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("message",is("Access Denied - you don't have permissions for this action")));
     }
 
     @Test
@@ -140,13 +132,13 @@ class ProductsControllerTest {
                 post("/api/v1/products")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(gson.toJson(product))
-                        .accept(MediaType.APPLICATION_JSON)
-                        .with(csrf()))
-                .andExpect(status().isUnauthorized());
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("message", is("Full authentication is required to access this resource")));
     }
 
     @Test
-    @WithMockUser(roles = "ADMIN")
+    @WithMockUser(authorities = "ADMIN")
     void givenUpdateProductThatNotInDB_ReturnError404() throws Exception {
         Product product = new Product("product1", "testing product", 5.50, 5);
         long productId = 1L;
@@ -167,7 +159,7 @@ class ProductsControllerTest {
     }
 
     @Test
-    @WithMockUser(roles = "ADMIN")
+    @WithMockUser(authorities = "ADMIN")
     void givenUpdateProduct_Return200() throws Exception {
         Product product = new Product("product1", "testing product", 5.50, 5);
         long productId = 1L;
@@ -187,7 +179,7 @@ class ProductsControllerTest {
     }
 
     @Test
-    @WithMockUser(roles = "USER")
+    @WithMockUser(authorities = "USER")
     void givenGetProductThatNotInDB_ReturnError404() throws Exception {
         long productId = 1L;
         String errorMessage = String.format("Product with id %s was not found",
@@ -206,7 +198,7 @@ class ProductsControllerTest {
     }
 
     @Test
-    @WithMockUser(roles = "USER")
+    @WithMockUser(authorities = "USER")
     void givenGetProductWithValidId_Return200AndProduct() throws Exception {
         long productId = 1L;
         Product product = new Product("product1", "testing product", 5.50, 5);
@@ -225,7 +217,7 @@ class ProductsControllerTest {
     }
 
     @Test
-    @WithMockUser(roles = "ADMIN")
+    @WithMockUser(authorities = "ADMIN")
     void givenDeleteProductThatNotInDB_ReturnError404() throws Exception {
         long productId = 1L;
         String errorMessage = String.format("Product with id %s was not found",
@@ -244,7 +236,7 @@ class ProductsControllerTest {
     }
 
     @Test
-    @WithMockUser(roles = "ADMIN")
+    @WithMockUser(authorities = "ADMIN")
     void givenDeleteWithValidProductId_Return200() throws Exception {
         long productId = 1L;
         String message = String.format("Product with id %s was deleted",
@@ -263,7 +255,7 @@ class ProductsControllerTest {
     }
 
     @Test
-    @WithMockUser(username = "test@gmail.com",roles = "ADMIN")
+    @WithMockUser(authorities = "ADMIN")
     void givenRequestedValidPageNumber_ReturnProducts() throws Exception {
         Product product = new Product("product1", "testing product", 5.50, 5);
         List<Product> content = new ArrayList<>();
@@ -280,7 +272,7 @@ class ProductsControllerTest {
     }
 
     @Test
-    @WithMockUser(username = "test@gmail.com",roles = "ADMIN")
+    @WithMockUser(authorities = "ADMIN")
     void givenRequestedPageNumberThatIsEmpty_ReturnError() throws Exception {
         String errorMessage = "Page 2 not found. Products has 1 pages";
         given(productsService.getAllProducts(2,4)).willThrow(new ResourceNotFoundException(errorMessage));
