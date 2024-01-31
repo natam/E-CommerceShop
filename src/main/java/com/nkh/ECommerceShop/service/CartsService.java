@@ -80,7 +80,7 @@ public class CartsService {
                         .getId() == productId)
                 .findFirst();
         if (foundCartProduct.isPresent()) {
-            //if product from cart if its quantity is 1 otherwise decrease its quantity in cart on 1
+            //if product's quantity in cart is 1 -> remove this product, otherwise decrease its quantity in cart on 1
             if(foundCartProduct.get().getProductQuantity()==1){
                 cartsProductsRepository.deleteAllByCartId(myCart.getId());
             }else {
