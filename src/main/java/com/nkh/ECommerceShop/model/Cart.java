@@ -19,7 +19,7 @@ public class Cart {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
     private long userId;
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     @JoinColumn(name = "cartId")
     private Set<CartProduct> cartProducts = new HashSet<CartProduct>();;
     private double totalCartProductsPrice;
@@ -27,6 +27,11 @@ public class Cart {
     private LocalDateTime createdAt;
     @UpdateTimestamp
     private LocalDateTime updatedAt;
+
+    public Cart(long userId) {
+        this.userId = userId;
+    }
+
     public Cart(long userId, Set<CartProduct> cartProducts){
         this.userId = userId;
         this.cartProducts = cartProducts;
