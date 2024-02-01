@@ -56,6 +56,17 @@ public class ControllerExceptionHandler {
         return new ResponseEntity<>(message, HttpStatus.BAD_REQUEST);
     }
 
+    @ExceptionHandler(NotEnoughProductQuantityException.class)
+    public ResponseEntity<ErrorMessage> handleNotEnoughQuantityErrors(NotEnoughProductQuantityException ex, WebRequest request) {
+        logger.error("Not enough product quantity in stock");
+        ErrorMessage message = new ErrorMessage(
+                HttpStatus.BAD_REQUEST.value(),
+                new Date(),
+                "Product not added to cart: " + ex.getMessage(),
+                request.getDescription(false));
+        return new ResponseEntity<>(message, HttpStatus.BAD_REQUEST);
+    }
+
     @ExceptionHandler(TokenRefreshException.class)
     public ResponseEntity<ErrorMessage> handleTokenRefreshException(TokenRefreshException ex, WebRequest request) {
         logger.error("Refresh Token Error: {}", ex.getMessage());
@@ -95,6 +106,7 @@ public class ControllerExceptionHandler {
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorMessage> globalExceptionHandler(Exception ex, WebRequest request) {
         logger.error("Error acquires: {}", ex.getMessage());
+        ex.printStackTrace();
         ErrorMessage message = new ErrorMessage(
                 HttpStatus.INTERNAL_SERVER_ERROR.value(),
                 new Date(),
