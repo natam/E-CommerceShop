@@ -24,4 +24,18 @@ public class CartsController {
         cartsService.addProductToCart(productId, quantity);
         return ResponseEntity.ok().body(new MessageResponseDTO("Product was added to your cart"));
     }
+
+    @GetMapping("/mycart")
+    @PreAuthorize("hasAnyRole('USER')")
+    public ResponseEntity<Cart> getMyCart(){
+        return ResponseEntity.ok(cartsService.getMyCart());
+    }
+
+    @DeleteMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN')")
+    public ResponseEntity<MessageResponseDTO> deleteCart(@PathVariable("id") long id){
+        cartsService.deleteProductFromCart(id);
+        String message = String.format("Product with id %d was removed from cart", id);
+        return ResponseEntity.ok().body(new MessageResponseDTO(message));
+    }
 }
