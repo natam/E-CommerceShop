@@ -46,7 +46,7 @@ public class CartsService {
     }
 
     @Transactional
-    public void addProductToCart(long productId, int quantity) {
+    public boolean addProductToCart(long productId, int quantity) {
         Product product = productsService.getById(productId);
         if (productsService.checkProductStock(productId, quantity)) {
             Cart myCart = getMyCart();
@@ -60,6 +60,7 @@ public class CartsService {
                 myCart.getCartProducts().add(new CartProduct(myCart.getId(), product, quantity));
             }
             myCart.setTotalCartProductsPrice(myCart.getTotalCartProductsPrice() + product.getPrice() * quantity);
+            return true;
         } else {
             throw new NotEnoughProductQuantityException(product.getStock());
         }
@@ -99,6 +100,12 @@ public class CartsService {
         } else {
             throw new ResourceNotFoundException(String.format("Product with id %d is not found in cart", productId));
         }
+    }
+
+    @Transactional
+    public void deleteCart(long cartId){
+        cleanCart();
+        cartsRepository.deleteById(cartId);
     }
 
     public Optional<CartProduct> findProductInMyCart(long productId, Cart cart){
