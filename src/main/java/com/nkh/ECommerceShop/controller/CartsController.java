@@ -2,8 +2,6 @@ package com.nkh.ECommerceShop.controller;
 
 import com.nkh.ECommerceShop.dto.MessageResponseDTO;
 import com.nkh.ECommerceShop.model.Cart;
-import com.nkh.ECommerceShop.repository.CartsProductsRepository;
-import com.nkh.ECommerceShop.repository.CartsRepository;
 import com.nkh.ECommerceShop.service.CartsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -19,7 +17,7 @@ public class CartsController {
         this.cartsService = cartsService;
     }
 
-    @PostMapping("/mycart/add")
+    @PostMapping("/mycart/products/add")
     @PreAuthorize("hasAnyRole('USER')")
     public ResponseEntity<MessageResponseDTO> addProductToMyCart(@RequestParam("productId") long productId,
                                                                  @RequestParam("quantity") int quantity){

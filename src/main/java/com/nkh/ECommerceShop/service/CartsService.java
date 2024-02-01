@@ -30,7 +30,9 @@ public class CartsService {
 
     public Cart getMyCart() {
         UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        return cartsRepository.findByUserId(userDetails.getId()).get();
+        return cartsRepository.findByUserId(userDetails.getId())
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        String.format("Cart for userId %d", userDetails.getId())));
     }
 
     public Cart createCart(long userId) {
@@ -44,17 +46,12 @@ public class CartsService {
     }
 
     @Transactional
-    public void addProductToCart(long productId, int quantity) {
+    public boolean addProductToCart(long productId, int quantity) {
         Product product = productsService.getById(productId);
         if (productsService.checkProductStock(productId, quantity)) {
             Cart myCart = getMyCart();
             //check if product presents in cart. If yes - increase its quantity, otherwise - add it to cart
-            Optional<CartProduct> foundCartProduct = myCart
-                    .getCartProducts()
-                    .stream()
-                    .filter(cartProducts -> cartProducts.getProduct()
-                            .getId() == productId)
-                    .findFirst();
+            Optional<CartProduct> foundCartProduct = findProductInMyCart(productId, myCart);
             if (foundCartProduct.isPresent()) {
                 foundCartProduct.get()
                         .setProductQuantity(foundCartProduct.get()
@@ -63,6 +60,7 @@ public class CartsService {
                 myCart.getCartProducts().add(new CartProduct(myCart.getId(), product, quantity));
             }
             myCart.setTotalCartProductsPrice(myCart.getTotalCartProductsPrice() + product.getPrice() * quantity);
+            return true;
         } else {
             throw new NotEnoughProductQuantityException(product.getStock());
         }
@@ -73,16 +71,11 @@ public class CartsService {
         Product product = productsService.getById(productId);
         Cart myCart = getMyCart();
         //check if product presents in cart
-        Optional<CartProduct> foundCartProduct = myCart
-                .getCartProducts()
-                .stream()
-                .filter(cartProducts -> cartProducts.getProduct()
-                        .getId() == productId)
-                .findFirst();
+        Optional<CartProduct> foundCartProduct = findProductInMyCart(productId, myCart);
         if (foundCartProduct.isPresent()) {
             //if product's quantity in cart is 1 -> remove this product, otherwise decrease its quantity in cart on 1
             if(foundCartProduct.get().getProductQuantity()==1){
-                cartsProductsRepository.deleteAllByCartId(myCart.getId());
+                cartsProductsRepository.deleteByCartIdAndProduct(myCart.getId(), product);
             }else {
                 foundCartProduct.get()
                         .setProductQuantity(foundCartProduct.get()
@@ -99,18 +92,28 @@ public class CartsService {
         Product product = productsService.getById(productId);
         Cart myCart = getMyCart();
         //check if product is in cart
-        Optional<CartProduct> foundCartProduct = myCart
+        Optional<CartProduct> foundCartProduct = findProductInMyCart(productId, myCart);
+        if (foundCartProduct.isPresent()) {
+            double removedProductPrice = foundCartProduct.get().getProductQuantity()*product.getPrice();
+            myCart.setTotalCartProductsPrice(myCart.getTotalCartProductsPrice() - removedProductPrice);
+            cartsProductsRepository.deleteByCartIdAndProduct(myCart.getId(), product);
+        } else {
+            throw new ResourceNotFoundException(String.format("Product with id %d is not found in cart", productId));
+        }
+    }
+
+    @Transactional
+    public void deleteCart(long cartId){
+        cleanCart();
+        cartsRepository.deleteById(cartId);
+    }
+
+    public Optional<CartProduct> findProductInMyCart(long productId, Cart cart){
+        return cart
                 .getCartProducts()
                 .stream()
                 .filter(cartProducts -> cartProducts.getProduct()
                         .getId() == productId)
                 .findFirst();
-        if (foundCartProduct.isPresent()) {
-            double removedProductPrice = foundCartProduct.get().getProductQuantity()*product.getPrice();
-            myCart.setTotalCartProductsPrice(myCart.getTotalCartProductsPrice() - removedProductPrice);
-            cartsProductsRepository.deleteAllByCartId(myCart.getId());
-        } else {
-            throw new ResourceNotFoundException(String.format("Product with id %d is not found in cart", productId));
-        }
     }
 }
