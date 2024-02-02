@@ -38,4 +38,27 @@ public class CartsController {
         String message = String.format("Product with id %d was removed from cart", id);
         return ResponseEntity.ok().body(new MessageResponseDTO(message));
     }
+
+    @DeleteMapping("mycart/products/{id}")
+    @PreAuthorize("hasAnyRole('USER')")
+    public ResponseEntity<MessageResponseDTO> deleteProductFromMyCart(@PathVariable("id") long id){
+        cartsService.deleteProductFromCart(id);
+        String message = String.format("Product with id %d was removed from cart", id);
+        return ResponseEntity.ok().body(new MessageResponseDTO(message));
+    }
+
+    @PostMapping("mycart/products/{id}/reduce")
+    @PreAuthorize("hasAnyRole('USER')")
+    public ResponseEntity<MessageResponseDTO> reduceProductAmountInMyCart(@PathVariable("id") long id){
+        cartsService.reduceProductQuantityInCart(id);
+        String message = String.format("Product with id %d was reduced", id);
+        return ResponseEntity.ok().body(new MessageResponseDTO(message));
+    }
+
+    @GetMapping("/mycart/clear")
+    @PreAuthorize("hasAnyRole('USER')")
+    public ResponseEntity<MessageResponseDTO> clearMyCart(){
+        cartsService.cleanCart();
+        return ResponseEntity.ok(new MessageResponseDTO("Cart was cleaned"));
+    }
 }
