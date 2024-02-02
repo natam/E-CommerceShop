@@ -5,6 +5,7 @@ import com.nkh.ECommerceShop.model.*;
 import com.nkh.ECommerceShop.security.WebSecurityConfig;
 import com.nkh.ECommerceShop.security.jwt.AuthEntryPointJwt;
 import com.nkh.ECommerceShop.security.jwt.JwtUtils;
+import com.nkh.ECommerceShop.security.service.UserDetailsImpl;
 import com.nkh.ECommerceShop.security.service.UserDetailsServiceImpl;
 import com.nkh.ECommerceShop.service.CartsService;
 import com.nkh.ECommerceShop.service.ProductsService;
@@ -18,9 +19,12 @@ import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
+
+import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -108,5 +112,41 @@ class CartsControllerTest {
                 .andExpect(content()
                         .contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("message", is(errorMessage)));
+    }
+
+    @Test
+    @WithMockUser(username = "test@test.com", authorities = "USER")
+    void givenGetMyCartWithSeveralProducts_ReturnOkAndCart() throws Exception {
+        Product product2 = new Product("product2", "testing product", 14.30, 15);
+        product2.setId(2);
+        Product product1 = new Product("product1", "testing product", 5.50, 5);
+        product1.setId(1);
+        Cart cart = new Cart(1);
+        cart.setId(3);
+        CartProduct cartProduct1 = new CartProduct(0, product1, 1);
+        CartProduct cartProduct2 = new CartProduct(0, product2, 2);
+        cart.getCartProducts().add(cartProduct1);
+        cart.getCartProducts().add(cartProduct2);
+        double totalPrice = product2.getPrice()*2 + product1.getPrice();
+        cart.setTotalCartProductsPrice(totalPrice);
+        given(cartsService.getMyCart()).willReturn(cart);
+        Users user = new Users("test", "test@test.com", "pass1234", Role.USER);
+        user.setId(1);
+        given(userDetailsService.loadUserByUsername("test@test.com")).willReturn(UserDetailsImpl.build(user));
+        mvc.perform(
+                        get("/api/v1/carts/mycart")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .accept(MediaType.APPLICATION_JSON)
+                                .with(csrf()))
+                .andExpect(status().isOk())
+                .andExpect(content()
+                        .contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("id", is(3)))
+                .andExpect(jsonPath("totalCartProductsPrice", is(totalPrice)))
+                .andExpect(jsonPath("cartProducts", hasSize(2)))
+                .andExpect(jsonPath("cartProducts[0].product.id", is(1)))
+                .andExpect(jsonPath("cartProducts[0].productQuantity", is(1)))
+                .andExpect(jsonPath("cartProducts[1].product.id", is(2)))
+                .andExpect(jsonPath("cartProducts[1].productQuantity", is(2)));
     }
 }
