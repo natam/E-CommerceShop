@@ -47,15 +47,15 @@ public class CartsController {
         return ResponseEntity.ok().body(new MessageResponseDTO(message));
     }
 
-    @PostMapping("mycart/products/{id}/reduce")
+    @PostMapping("mycart/products/reduce")
     @PreAuthorize("hasAnyRole('USER')")
-    public ResponseEntity<MessageResponseDTO> reduceProductAmountInMyCart(@PathVariable("id") long id){
+    public ResponseEntity<MessageResponseDTO> reduceProductAmountInMyCart(@RequestParam("productId") long id){
         cartsService.reduceProductQuantityInCart(id);
         String message = String.format("Product with id %d was reduced", id);
         return ResponseEntity.ok().body(new MessageResponseDTO(message));
     }
 
-    @GetMapping("/mycart/clear")
+    @PostMapping("/mycart/clear")
     @PreAuthorize("hasAnyRole('USER')")
     public ResponseEntity<MessageResponseDTO> clearMyCart(){
         cartsService.cleanCart();

@@ -1,6 +1,7 @@
 package com.nkh.ECommerceShop.controller;
 
 import com.nkh.ECommerceShop.exception.NotEnoughProductQuantityException;
+import com.nkh.ECommerceShop.exception.ResourceNotFoundException;
 import com.nkh.ECommerceShop.model.*;
 import com.nkh.ECommerceShop.security.WebSecurityConfig;
 import com.nkh.ECommerceShop.security.jwt.AuthEntryPointJwt;
@@ -23,9 +24,9 @@ import org.springframework.test.web.servlet.MockMvc;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.doThrow;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(value = CartsController.class, includeFilters = {
@@ -148,5 +149,129 @@ class CartsControllerTest {
                 .andExpect(jsonPath("cartProducts[0].productQuantity", is(1)))
                 .andExpect(jsonPath("cartProducts[1].product.id", is(2)))
                 .andExpect(jsonPath("cartProducts[1].productQuantity", is(2)));
+    }
+
+    @Test
+    @WithMockUser(username = "test@test.com", authorities = "USER")
+    void givenReduceProductThatNotInCart_Return404() throws Exception {
+        String errorMessage = "Product with id 3 is not found in cart";
+        doThrow(new ResourceNotFoundException(errorMessage)).when(cartsService).reduceProductQuantityInCart(3);
+        mvc.perform(
+                        post("/api/v1/carts/mycart/products/reduce")
+                                .param("productId", "3")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .accept(MediaType.APPLICATION_JSON)
+                                .with(csrf()))
+                .andExpect(status().isNotFound())
+                .andExpect(content()
+                        .contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("message", is(errorMessage)));
+    }
+
+    @Test
+    @WithMockUser(username = "test@test.com", authorities = "USER")
+    void givenReduceProductWithQuantity2InCart_ReturnOk() throws Exception {
+        Product product2 = new Product("product2", "testing product", 14.30, 15);
+        product2.setId(2);
+        Cart cart = new Cart(1);
+        cart.setId(3);
+        CartProduct cartProduct2 = new CartProduct(0, product2, 2);
+        cart.getCartProducts().add(cartProduct2);
+        double totalPrice = product2.getPrice()*2;
+        cart.setTotalCartProductsPrice(totalPrice);
+        given(cartsService.getMyCart()).willReturn(cart);
+        Users user = new Users("test", "test@test.com", "pass1234", Role.USER);
+        user.setId(1);
+        given(userDetailsService.loadUserByUsername("test@test.com")).willReturn(UserDetailsImpl.build(user));
+        String message = String.format("Product with id %d was reduced", 2);
+        mvc.perform(
+                        post("/api/v1/carts/mycart/products/reduce")
+                                .param("productId", "2")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .accept(MediaType.APPLICATION_JSON)
+                                .with(csrf()))
+                .andExpect(status().isOk())
+                .andExpect(content()
+                        .contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("message", is(message)));
+    }
+
+    @Test
+    @WithMockUser(username = "test@test.com", authorities = "USER")
+    void givenReduceProductWithQuantity1InCart_ReturnOk() throws Exception {
+        Product product1 = new Product("product1", "testing product", 5.50, 5);
+        product1.setId(1);
+        Cart cart = new Cart(1);
+        CartProduct cartProduct1 = new CartProduct(0, product1, 1);
+        cart.getCartProducts().add(cartProduct1);
+        double totalPrice = product1.getPrice();
+        cart.setTotalCartProductsPrice(totalPrice);
+        Users user = new Users("test", "test@test.com", "pass1234", Role.USER);
+        user.setId(1);
+        given(cartsService.getMyCart()).willReturn(cart);
+        given(userDetailsService.loadUserByUsername("test@test.com")).willReturn(UserDetailsImpl.build(user));
+        String message = String.format("Product with id %d was reduced", 1);
+        mvc.perform(
+                        post("/api/v1/carts/mycart/products/reduce")
+                                .param("productId", "1")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .accept(MediaType.APPLICATION_JSON)
+                                .with(csrf()))
+                .andExpect(status().isOk())
+                .andExpect(content()
+                        .contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("message", is(message)));
+    }
+
+    @Test
+    @WithMockUser(username = "test@test.com", authorities = "USER")
+    void givenDeleteProductFromCart_ReturnOk() throws Exception {
+        Product product1 = new Product("product1", "testing product", 5.50, 5);
+        product1.setId(1);
+        Cart cart = new Cart(1);
+        CartProduct cartProduct1 = new CartProduct(0, product1, 1);
+        cart.getCartProducts().add(cartProduct1);
+        double totalPrice = product1.getPrice();
+        cart.setTotalCartProductsPrice(totalPrice);
+        Users user = new Users("test", "test@test.com", "pass1234", Role.USER);
+        user.setId(1);
+        given(cartsService.getMyCart()).willReturn(cart);
+        given(userDetailsService.loadUserByUsername("test@test.com")).willReturn(UserDetailsImpl.build(user));
+        String message = String.format("Product with id %d was removed from cart", 1);
+        mvc.perform(
+                        delete("/api/v1/carts/mycart/products/1")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .accept(MediaType.APPLICATION_JSON)
+                                .with(csrf()))
+                .andExpect(status().isOk())
+                .andExpect(content()
+                        .contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("message", is(message)));
+    }
+
+    @Test
+    @WithMockUser(username = "test@test.com", authorities = "USER")
+    void givenClearCart_ReturnOk() throws Exception {
+        Product product1 = new Product("product1", "testing product", 5.50, 5);
+        product1.setId(1);
+        Cart cart = new Cart(1);
+        CartProduct cartProduct1 = new CartProduct(0, product1, 1);
+        cart.getCartProducts().add(cartProduct1);
+        double totalPrice = product1.getPrice();
+        cart.setTotalCartProductsPrice(totalPrice);
+        Users user = new Users("test", "test@test.com", "pass1234", Role.USER);
+        user.setId(1);
+        given(cartsService.getMyCart()).willReturn(cart);
+        given(userDetailsService.loadUserByUsername("test@test.com")).willReturn(UserDetailsImpl.build(user));
+        String message = "Cart was cleaned";
+        mvc.perform(
+                        post("/api/v1/carts/mycart/clear")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .accept(MediaType.APPLICATION_JSON)
+                                .with(csrf()))
+                .andExpect(status().isOk())
+                .andExpect(content()
+                        .contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("message", is(message)));
     }
 }
