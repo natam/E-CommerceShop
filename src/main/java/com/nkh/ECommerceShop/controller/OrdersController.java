@@ -15,16 +15,5 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/v1/orders")
 public class OrdersController {
-    private final OrdersRepository ordersRepository;
 
-    @Autowired
-    public OrdersController(OrdersRepository ordersRepository) {
-        this.ordersRepository = ordersRepository;
-    }
-
-    @GetMapping
-    @PreAuthorize("hasAnyRole('USER')")
-    public ResponseEntity<List<Order>> getAllOrders(){
-        return ResponseEntity.ok(ordersRepository.findAll());
-    }
 }
