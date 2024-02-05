@@ -15,6 +15,7 @@ import com.nkh.ECommerceShop.security.jwt.JwtUtils;
 import com.nkh.ECommerceShop.security.service.RefreshTokenService;
 import com.nkh.ECommerceShop.security.service.UserDetailsImpl;
 import com.nkh.ECommerceShop.security.service.UserDetailsServiceImpl;
+import com.nkh.ECommerceShop.service.CartsService;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -59,6 +60,8 @@ class AuthControllerTest {
     private UsersRepository usersRepository;
     @MockBean
     private RefreshTokenRepository refreshTokenRepository;
+    @MockBean
+    private CartsService cartsService;
     @MockBean
     private UserDetailsServiceImpl userDetailsService;
     @Autowired

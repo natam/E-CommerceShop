@@ -11,6 +11,7 @@ import com.nkh.ECommerceShop.repository.UsersRepository;
 import com.nkh.ECommerceShop.security.jwt.JwtUtils;
 import com.nkh.ECommerceShop.security.service.RefreshTokenService;
 import com.nkh.ECommerceShop.security.service.UserDetailsImpl;
+import com.nkh.ECommerceShop.service.CartsService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
@@ -32,23 +33,26 @@ import java.util.List;
 @RequestMapping("/api/auth")
 public class AuthController {
     private final AuthenticationManager authenticationManager;
-
     private final RefreshTokenService refreshTokenService;
     private final UsersRepository userRepository;
     private final PasswordEncoder encoder;
     private final JwtUtils jwtUtils;
+
+    private final CartsService cartsService;
 
     @Autowired
     public AuthController(AuthenticationManager authenticationManager,
                           RefreshTokenService refreshTokenService,
                           UsersRepository usersRepository,
                           PasswordEncoder passwordEncoder,
-                          JwtUtils jwtUtils) {
+                          JwtUtils jwtUtils,
+                          CartsService cartsService) {
         this.authenticationManager = authenticationManager;
         this.refreshTokenService = refreshTokenService;
         this.userRepository = usersRepository;
         this.encoder = passwordEncoder;
         this.jwtUtils = jwtUtils;
+        this.cartsService = cartsService;
     }
 
     @PostMapping("/signin")
@@ -84,7 +88,8 @@ public class AuthController {
         Users user = new Users(signUpRequest.getName(),
                 signUpRequest.getEmail(),
                 encoder.encode(signUpRequest.getPassword()), Role.USER);
-        userRepository.save(user);
+        // Create cart for new user
+        cartsService.createCart(userRepository.save(user).getId());
 
         return ResponseEntity.ok(new MessageResponseDTO("User registered successfully!"));
     }

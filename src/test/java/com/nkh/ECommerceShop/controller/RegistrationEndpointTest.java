@@ -2,6 +2,7 @@ package com.nkh.ECommerceShop.controller;
 
 import com.google.gson.Gson;
 import com.nkh.ECommerceShop.dto.auth.RegistrationRequestDTO;
+import com.nkh.ECommerceShop.model.Cart;
 import com.nkh.ECommerceShop.model.Role;
 import com.nkh.ECommerceShop.model.Users;
 import com.nkh.ECommerceShop.repository.RefreshTokenRepository;
@@ -11,7 +12,13 @@ import com.nkh.ECommerceShop.security.jwt.AuthEntryPointJwt;
 import com.nkh.ECommerceShop.security.jwt.JwtUtils;
 import com.nkh.ECommerceShop.security.service.RefreshTokenService;
 import com.nkh.ECommerceShop.security.service.UserDetailsServiceImpl;
+import com.nkh.ECommerceShop.service.CartsService;
+import jakarta.persistence.GeneratedValue;
 import org.junit.jupiter.api.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -22,14 +29,17 @@ import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 
+import java.util.Arrays;
+
 import static org.mockito.BDDMockito.given;
 import static org.hamcrest.Matchers.*;
+import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-
 @WebMvcTest(value = AuthController.class, includeFilters = {
         // to include JwtUtil in spring context
         @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, classes = {JwtUtils.class, AuthEntryPointJwt.class})})
@@ -44,6 +54,8 @@ public class RegistrationEndpointTest {
     private UsersRepository usersRepository;
     @MockBean
     private RefreshTokenRepository refreshTokenRepository;
+    @MockBean
+    private CartsService cartsService;
     @MockBean
     private UserDetailsServiceImpl userDetailsService;
     @Autowired
@@ -160,15 +172,17 @@ public class RegistrationEndpointTest {
 
     @Test
     void givenValidRegistrationRequest_ReturnSuccessMessage() throws Exception {
-        RegistrationRequestDTO credentials = new RegistrationRequestDTO("test", "test@test.com", "QWE123!");
-        Users user = new Users("test", "test@test.com", encoder.encode("QWE123!"), Role.USER);
+        RegistrationRequestDTO requestDTO = new RegistrationRequestDTO("test user", "test@test.com", "QWE123!");
+        Users user = new Users("test user", "test@test.com","QWE123!", Role.USER);
+        user.setId(1);
         Gson gson = new Gson();
         given(usersRepository.existsByEmail("test@test.com")).willReturn(false);
-        given(usersRepository.save(user)).willReturn(user);
+        given(usersRepository.save(Mockito.any(Users.class))).willReturn(user);
+        given(cartsService.createCart(0)).willReturn(new Cart(1));
         mvc.perform(
                 post("/api/auth/signup")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(gson.toJson(credentials))
+                .content(gson.toJson(requestDTO))
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(content()
