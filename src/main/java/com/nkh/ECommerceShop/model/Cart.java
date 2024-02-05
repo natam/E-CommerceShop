@@ -21,7 +21,7 @@ public class Cart {
     private long userId;
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     @JoinColumn(name = "cartId")
-    private Set<CartProduct> cartProducts = new HashSet<CartProduct>();;
+    private Set<CartProduct> cartProducts = new HashSet<CartProduct>();
     private double totalCartProductsPrice;
     @CreationTimestamp
     private LocalDateTime createdAt;

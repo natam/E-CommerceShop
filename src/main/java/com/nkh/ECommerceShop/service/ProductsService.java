@@ -58,4 +58,10 @@ public class ProductsService {
         }
         return products;
     }
+
+    public void reduceProductStockQuantity(long productId, int reduceAmount){
+        Product product = getById(productId);
+        product.setStock(product.getStock()-reduceAmount);
+        updateProduct(productId, product);
+    }
 }

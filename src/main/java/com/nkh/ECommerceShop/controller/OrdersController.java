@@ -2,11 +2,12 @@ package com.nkh.ECommerceShop.controller;
 
 import com.nkh.ECommerceShop.model.order.Order;
 import com.nkh.ECommerceShop.repository.OrdersRepository;
-import jakarta.validation.OverridesAttribute;
+import com.nkh.ECommerceShop.service.OrdersService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -16,15 +17,23 @@ import java.util.List;
 @RequestMapping("/api/v1/orders")
 public class OrdersController {
     private final OrdersRepository ordersRepository;
+    private final OrdersService ordersService;
 
     @Autowired
-    public OrdersController(OrdersRepository ordersRepository) {
+    public OrdersController(OrdersRepository ordersRepository, OrdersService ordersService) {
         this.ordersRepository = ordersRepository;
+        this.ordersService = ordersService;
     }
 
     @GetMapping
     @PreAuthorize("hasAnyRole('USER')")
     public ResponseEntity<List<Order>> getAllOrders(){
         return ResponseEntity.ok(ordersRepository.findAll());
+    }
+
+    @PostMapping("/process/mycart")
+    @PreAuthorize("hasAnyRole('USER')")
+    public ResponseEntity<Order> processMyCart(){
+        return ResponseEntity.ok().body(ordersService.placeOrderFromCart());
     }
 }
