@@ -3,8 +3,15 @@ package com.nkh.ECommerceShop.repository;
 import com.nkh.ECommerceShop.model.CartProduct;
 import com.nkh.ECommerceShop.model.Product;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+import org.springframework.transaction.annotation.Transactional;
 
 public interface CartsProductsRepository extends JpaRepository<CartProduct, Long> {
-    void deleteAllByCartId(long cartId);
+    @Modifying
+    @Transactional
+    @Query(value="delete from cartProducts where cartId=?1", nativeQuery = true)
+    void deleteAllProductsByCartId(long cartId);
     void deleteByCartIdAndProduct(long cartId, Product product);
 }

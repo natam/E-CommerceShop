@@ -38,11 +38,11 @@ public class CartsService {
     public Cart createCart(long userId) {
         return cartsRepository.save(new Cart(userId));
     }
-
     @Transactional
     public void cleanCart() {
-        cartsProductsRepository.deleteAllByCartId(getMyCart().getId());
-        getMyCart().setTotalCartProductsPrice(0);
+        Cart myCart = getMyCart();
+        cartsProductsRepository.deleteAllProductsByCartId(myCart.getId());
+        myCart.setTotalCartProductsPrice(0);
     }
 
     @Transactional
