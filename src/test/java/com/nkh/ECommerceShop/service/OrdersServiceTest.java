@@ -97,7 +97,7 @@ class OrdersServiceTest {
     void givenPlaceOrderWithNotEnoughProductsInStock_ThrowException() {
         Product product1 = new Product("product1", "test description", 10, 20);
         product1.setId(1);
-        String errorMessage = String.format("Order can not be placed. Not enough product (id: %d quantity in stock", product1.getId());
+        String errorMessage = String.format("Order can not be placed. Not enough product (id: %d) quantity in stock", product1.getId());
         when(usersService.getCurrentUserId()).thenReturn(1L);
         Cart myCart = new Cart(1L);
         myCart.setId(1);
