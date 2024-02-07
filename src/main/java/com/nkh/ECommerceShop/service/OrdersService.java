@@ -76,6 +76,14 @@ public class OrdersService {
                 );
     }
 
+    public Order getMyOrderById(long id){
+        return ordersRepository.findByIdAndUserId(id, usersService.getCurrentUserId())
+                .orElseThrow(()->
+                        new ResourceNotFoundException(
+                                String.format("Order with id %d not found", id))
+                );
+    }
+
     @Transactional
     public Order placeOrderFromCart(){
         long currentUserId = usersService.getCurrentUserId();
