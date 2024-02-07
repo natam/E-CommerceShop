@@ -18,6 +18,10 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -48,17 +52,17 @@ class OrdersServiceTest {
 
     @Test
     void getMyOrders() {
-        List<Order> userOrders = new ArrayList<>();
+        Pageable pageable = PageRequest.of(0, 5);
         Order order1 = new Order(1, 10);
         order1.setId(1);
         Product product1 = new Product("product1", "test description", 10, 20);
         product1.setId(1);
         OrderProduct orderProduct1 = new OrderProduct(1, product1, 1);
         order1.getProducts().add(orderProduct1);
-        userOrders.add(order1);
+        Page<Order> userOrders = new PageImpl<>(List.of(order1),pageable,1);
         when(usersService.getCurrentUserId()).thenReturn(1L);
-        when(ordersRepository.findByUserId(1L)).thenReturn(userOrders);
-        assertEquals(userOrders, ordersService.getMyOrders());
+        when(ordersRepository.findAllByUserId(1L, pageable)).thenReturn(userOrders);
+        assertEquals(userOrders, ordersService.getMyOrders(0,5));
     }
 
     @Test
