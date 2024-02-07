@@ -84,7 +84,7 @@ class CartsServiceTest {
             Mockito.doAnswer(i -> {
                 userCart.getCartProducts().remove(cartProduct);
                 return null;
-            }).when(cartsProductsRepository).deleteAllByCartId(userCart.getId());
+            }).when(cartsProductsRepository).deleteAllProductsByCartId(userCart.getId());
             cartsService.cleanCart();
             assertEquals(0, userCart.getCartProducts().size());
             assertEquals(0, userCart.getTotalCartProductsPrice());

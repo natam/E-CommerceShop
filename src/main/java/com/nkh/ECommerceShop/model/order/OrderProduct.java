@@ -1,5 +1,6 @@
 package com.nkh.ECommerceShop.model.order;
 
+import com.nkh.ECommerceShop.model.CartProduct;
 import com.nkh.ECommerceShop.model.Product;
 import jakarta.persistence.*;
 import lombok.Data;
@@ -31,5 +32,11 @@ public class OrderProduct {
         this.orderId = orderId;
         this.product = product;
         this.productQuantity = productQuantity;
+    }
+
+    public OrderProduct(long orderId, CartProduct cartProduct){
+        this.orderId = orderId;
+        product = cartProduct.getProduct();
+        productQuantity = cartProduct.getProductQuantity();
     }
 }

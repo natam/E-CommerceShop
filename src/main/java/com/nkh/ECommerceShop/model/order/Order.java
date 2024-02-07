@@ -1,5 +1,7 @@
 package com.nkh.ECommerceShop.model.order;
 
+import com.nkh.ECommerceShop.model.Cart;
+import com.nkh.ECommerceShop.model.CartProduct;
 import com.nkh.ECommerceShop.repository.OrdersRepository;
 import jakarta.persistence.*;
 import lombok.Data;
@@ -9,6 +11,7 @@ import org.hibernate.annotations.UpdateTimestamp;
 import org.springframework.data.jpa.repository.query.JpaQueryMethodFactory;
 
 import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.Set;
 
 @Entity
@@ -22,10 +25,10 @@ public class Order {
     private long userId;
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     @JoinColumn(name = "orderId")
-    private Set<OrderStatusHistory> trackStatuses;
+    private Set<OrderStatusHistory> trackStatuses = new HashSet<>();
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     @JoinColumn(name = "orderId")
-    private Set<OrderProduct> products;
+    private Set<OrderProduct> products = new HashSet<OrderProduct>();
     private double totalOrderSum;
     @CreationTimestamp
     private LocalDateTime createdAt;
@@ -35,5 +38,16 @@ public class Order {
     public Order(long userId){
         this.userId = userId;
         totalOrderSum = 0;
+    }
+
+    public Order(long userId, double totalOrderSum){
+        this.userId = userId;
+        this.totalOrderSum = totalOrderSum;
+    }
+
+    public void setProducts(Set<CartProduct> cartProducts){
+        cartProducts.forEach(cartProduct -> {
+            products.add(new OrderProduct(id, cartProduct));
+        });
     }
 }

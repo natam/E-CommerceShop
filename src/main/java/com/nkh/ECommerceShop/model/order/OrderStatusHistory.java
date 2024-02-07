@@ -20,4 +20,9 @@ public class OrderStatusHistory {
     private OrderStatus status;
     @CreationTimestamp
     private LocalDateTime createdAt;
+
+    public OrderStatusHistory(long orderId, OrderStatus status){
+        this.orderId = orderId;
+        this.status = status;
+    }
 }
