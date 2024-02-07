@@ -1,14 +1,10 @@
 package com.nkh.ECommerceShop.model.order;
-
-import com.nkh.ECommerceShop.model.Cart;
 import com.nkh.ECommerceShop.model.CartProduct;
-import com.nkh.ECommerceShop.repository.OrdersRepository;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
-import org.springframework.data.jpa.repository.query.JpaQueryMethodFactory;
 
 import java.time.LocalDateTime;
 import java.util.HashSet;

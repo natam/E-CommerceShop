@@ -45,7 +45,7 @@ public class OrdersService {
             if (!productsService.checkProductStock(
                     cartProduct.getProduct().getId(),
                     cartProduct.getProductQuantity())) {
-                throw new PlaceOrderException(String.format("Order can not be placed. Not enough product (id: %d quantity in stock", cartProduct.getProduct().getId()));
+                throw new PlaceOrderException(String.format("Order can not be placed. Not enough product (id: %d) quantity in stock", cartProduct.getProduct().getId()));
             }
         });
         Order order = new Order(currentUserId);
