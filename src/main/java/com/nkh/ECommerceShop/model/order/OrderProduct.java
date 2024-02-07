@@ -1,5 +1,7 @@
-package com.nkh.ECommerceShop.model;
+package com.nkh.ECommerceShop.model.order;
 
+import com.nkh.ECommerceShop.model.CartProduct;
+import com.nkh.ECommerceShop.model.Product;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -10,13 +12,13 @@ import java.time.LocalDateTime;
 
 @Entity
 @Data
-@Table(name = "cartProducts")
 @NoArgsConstructor
-public class CartProduct {
+@Table(name = "orderProducts")
+public class OrderProduct {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
-    private long cartId;
+    private long orderId;
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "productId")
     private Product product;
@@ -26,9 +28,15 @@ public class CartProduct {
     @UpdateTimestamp
     private LocalDateTime updatedAt;
 
-    public CartProduct(long cartId, Product product, int productQuantity){
-        this.cartId=cartId;
+    public OrderProduct(long orderId, Product product, int productQuantity) {
+        this.orderId = orderId;
         this.product = product;
         this.productQuantity = productQuantity;
+    }
+
+    public OrderProduct(long orderId, CartProduct cartProduct){
+        this.orderId = orderId;
+        product = cartProduct.getProduct();
+        productQuantity = cartProduct.getProductQuantity();
     }
 }
