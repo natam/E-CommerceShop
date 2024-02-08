@@ -15,8 +15,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-
 @Service
 public class OrdersService {
     private final CartsService cartService;
@@ -60,12 +58,11 @@ public class OrdersService {
     }
 
     @Transactional
-    public boolean updateOrderStatus(long orderId, long statusId){
+    public void updateOrderStatus(long orderId, long statusId){
         OrderStatus newStatus = statusesRepository.findById(statusId)
                 .orElseThrow(() -> new ResourceNotFoundException(
                         String.format("Status with id %d not found in DB", statusId)));
         statusesHistoryRepository.save(new OrderStatusHistory(orderId, newStatus));
-        return true;
     }
 
     public Order getOrderById(long id){
