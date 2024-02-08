@@ -2,10 +2,12 @@ package com.nkh.ECommerceShop.controller;
 
 import com.nkh.ECommerceShop.dto.MessageResponseDTO;
 import com.nkh.ECommerceShop.dto.OrderDTO;
+import com.nkh.ECommerceShop.dto.OrdersPageDTO;
 import com.nkh.ECommerceShop.model.order.Order;
 import com.nkh.ECommerceShop.model.order.OrderStatusHistory;
 import com.nkh.ECommerceShop.service.OrdersService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -62,5 +64,33 @@ public class OrdersController {
     public ResponseEntity<Set<OrderStatusHistory>> trackMyOrder(@PathVariable("id") long orderId){
         Order order = ordersService.getMyOrderById(orderId);
         return ResponseEntity.ok().body(order.getTrackStatuses());
+    }
+
+    @GetMapping("/my")
+    @PreAuthorize("hasAnyRole('USER')")
+    public ResponseEntity<OrdersPageDTO> getMyOrders(@RequestParam("page") int page,
+                                                      @RequestParam("size") int size){
+        Page<Order> orders = ordersService.getMyOrders(page, size);
+        OrdersPageDTO ordersPage = new OrdersPageDTO();
+        ordersPage.setOrders(orders.getContent());
+        ordersPage.setTotalPages(orders.getTotalPages());
+        ordersPage.setOffset(orders.getPageable().getOffset());
+        ordersPage.setLimit(size);
+        ordersPage.setCurrentPage(orders.getPageable().getPageNumber());
+        return ResponseEntity.ok().body(ordersPage);
+    }
+
+    @GetMapping
+    @PreAuthorize("hasAnyRole('ADMIN')")
+    public ResponseEntity<OrdersPageDTO> getAllOrders(@RequestParam("page") int page,
+                                                     @RequestParam("size") int size){
+        Page<Order> orders = ordersService.getAllOrders(page, size);
+        OrdersPageDTO ordersPage = new OrdersPageDTO();
+        ordersPage.setOrders(orders.getContent());
+        ordersPage.setTotalPages(orders.getTotalPages());
+        ordersPage.setOffset(orders.getPageable().getOffset());
+        ordersPage.setLimit(size);
+        ordersPage.setCurrentPage(orders.getPageable().getPageNumber());
+        return ResponseEntity.ok().body(ordersPage);
     }
 }
