@@ -41,18 +41,6 @@ public class OrdersService {
         this.usersService = userDetailsService;
     }
 
-    public Page<Order> getMyOrders(int page, int size){
-        Pageable pageable = PageRequest.of(page, size);
-        Page<Order> orders = ordersRepository
-                .findAllByUserId(usersService.getCurrentUserId(), pageable);
-        if(orders.isEmpty()){
-            throw new ResourceNotFoundException(
-                    String.format("Page %d not found. Products has %d pages",
-                            orders.getPageable().getPageNumber(), orders.getTotalPages()));
-        }
-        return orders;
-    }
-
     public Page<Order> getAllOrders(int page, int size, String startDate, String endDate, String status, Integer orderSum, Long userId){
         Pageable pageable = PageRequest.of(page, size);
         Specification<Order> spec = OrderSpecification.builder()
@@ -65,7 +53,7 @@ public class OrdersService {
         Page<Order> orders = ordersRepository.findAll(spec, pageable);
         if(orders.isEmpty()){
             throw new ResourceNotFoundException(
-                    String.format("Page %d not found. Products has %d pages",
+                    String.format("Page not found. Orders has %d pages",
                             orders.getPageable().getPageNumber(), orders.getTotalPages()));
         }
         return orders;
