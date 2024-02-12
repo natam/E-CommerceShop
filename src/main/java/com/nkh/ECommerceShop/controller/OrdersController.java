@@ -74,10 +74,9 @@ public class OrdersController {
                                                      @RequestParam("size") int size,
                                                      @RequestParam(value = "startDate", required = false) String startDate,
                                                      @RequestParam(value = "endDate", required = false) String endDate,
-                                                     @RequestParam(value = "orderSum", required = false) Integer orderSum,
-                                                     @RequestParam(value = "status",required = false) String status){
+                                                     @RequestParam(value = "orderSum", required = false) Integer orderSum){
         long currentUserId = usersService.getCurrentUserId();
-        Page<Order> orders = ordersService.getAllOrders(page, size, startDate, endDate, status,orderSum, currentUserId);
+        Page<Order> orders = ordersService.getAllOrders(page, size, startDate, endDate, orderSum, currentUserId);
         OrdersPageDTO ordersPage = new OrdersPageDTO();
         ordersPage.setOrders(orders.getContent());
         ordersPage.setTotalPages(orders.getTotalPages());
@@ -95,9 +94,8 @@ public class OrdersController {
                                                       @RequestParam(value = "startDate", required = false) String startDate,
                                                       @RequestParam(value = "endDate", required = false) String endDate,
                                                       @RequestParam(value = "orderSum", required = false) Integer orderSum,
-                                                      @RequestParam(value = "userId", required = false) Long userId,
-                                                      @RequestParam(value = "status",required = false) String status){
-        Page<Order> orders = ordersService.getAllOrders(page, size, startDate, endDate, status,orderSum, userId);
+                                                      @RequestParam(value = "userId", required = false) Long userId){
+        Page<Order> orders = ordersService.getAllOrders(page, size, startDate, endDate, orderSum, userId);
         OrdersPageDTO ordersPage = new OrdersPageDTO();
         ordersPage.setOrders(orders.getContent());
         ordersPage.setTotalPages(orders.getTotalPages());

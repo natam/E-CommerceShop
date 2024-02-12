@@ -13,6 +13,7 @@ import com.nkh.ECommerceShop.repository.OrderStatusesRepository;
 import com.nkh.ECommerceShop.repository.OrdersProductsRepository;
 import com.nkh.ECommerceShop.repository.OrdersRepository;
 import com.nkh.ECommerceShop.repository.OrdersStatusesHistoryRepository;
+import com.nkh.ECommerceShop.search.OrderSpecification;
 import com.nkh.ECommerceShop.security.service.UserDetailsServiceImpl;
 import org.hibernate.sql.ast.tree.expression.Star;
 import org.junit.jupiter.api.Test;
@@ -25,6 +26,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -54,7 +56,7 @@ class OrdersServiceTest {
     OrdersService ordersService;
 
     @Test
-    void givenGetMyOrdersForUserWithOrders_ReturnOrdersPage() {
+    void givenGetOrdersForUserWithOrders_ReturnOrdersPage() {
         Pageable pageable = PageRequest.of(0, 5);
         Order order1 = new Order(1, 10);
         order1.setId(1);
@@ -62,20 +64,24 @@ class OrdersServiceTest {
         product1.setId(1);
         OrderProduct orderProduct1 = new OrderProduct(1, product1, 1);
         order1.getProducts().add(orderProduct1);
+        Specification<Order> spec = OrderSpecification.builder()
+                .startDate("10.102024")
+                .userId((1L))
+                .build();
         Page<Order> userOrders = new PageImpl<>(List.of(order1),pageable,1);
-        when(usersService.getCurrentUserId()).thenReturn(1L);
-        when(ordersRepository.findAllByUserId(1L, pageable)).thenReturn(userOrders);
-        assertEquals(userOrders, ordersService.getMyOrders(0,5));
+        when(ordersRepository.findAll(spec, pageable)).thenReturn(userOrders);
+        assertEquals(userOrders, ordersService.getAllOrders(0,5, "10.102024", null, null, 1L));
     }
 
     @Test
     void givenGetMyOrdersForUserWithoutOrders_ThrowException() {
-        String errorMessage = "Page 0 not found. Products has 0 pages";
+        String errorMessage = "Page not found. Products has 0 pages";
         Pageable pageable = PageRequest.of(0, 5);
-        Page<Order> userOrders = Page.empty(pageable);
-        when(usersService.getCurrentUserId()).thenReturn(1L);
-        when(ordersRepository.findAllByUserId(1L, pageable)).thenThrow(new ResourceNotFoundException(errorMessage));
-        Exception exception = assertThrows(ResourceNotFoundException.class, ()-> ordersService.getMyOrders(0,5));
+        Specification<Order> spec = OrderSpecification.builder()
+                .userId((1L))
+                .build();
+        when(ordersRepository.findAll(spec, pageable)).thenThrow(new ResourceNotFoundException(errorMessage));
+        Exception exception = assertThrows(ResourceNotFoundException.class, ()-> ordersService.getAllOrders(0,5, null, null, null, 1L));
         assertEquals(errorMessage, exception.getMessage());
     }
 
@@ -149,8 +155,15 @@ class OrdersServiceTest {
         OrderProduct orderProduct1 = new OrderProduct(1, product1, 1);
         order1.getProducts().add(orderProduct1);
         Page<Order> orders = new PageImpl<>(List.of(order1),pageable,1);
-        when(ordersRepository.findAll(pageable)).thenReturn(orders);
-        assertEquals(orders, ordersService.getAllOrders(0,5));
+        Specification<Order> spec = OrderSpecification.builder()
+                .userId(null)
+                .startDate(null)
+                .orderSum(null)
+                .endDate(null)
+                .status(null)
+                .build();
+        when(ordersRepository.findAll(spec, pageable)).thenReturn(orders);
+        assertEquals(orders, ordersService.getAllOrders(0,5, null, null, null, null));
     }
 
     @Test

@@ -41,12 +41,11 @@ public class OrdersService {
         this.usersService = userDetailsService;
     }
 
-    public Page<Order> getAllOrders(int page, int size, String startDate, String endDate, String status, Integer orderSum, Long userId){
+    public Page<Order> getAllOrders(int page, int size, String startDate, String endDate, Integer orderSum, Long userId){
         Pageable pageable = PageRequest.of(page, size);
         Specification<Order> spec = OrderSpecification.builder()
                 .startDate(startDate)
                 .endDate(endDate)
-                .status(status)
                 .orderSum(orderSum)
                 .userId((userId))
                 .build();

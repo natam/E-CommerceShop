@@ -4,6 +4,7 @@ import com.nkh.ECommerceShop.exception.NotValidInputException;
 import com.nkh.ECommerceShop.model.order.Order;
 import com.nkh.ECommerceShop.model.order.OrderStatus;
 import com.nkh.ECommerceShop.model.order.OrderStatusHistory;
+import jakarta.persistence.Query;
 import jakarta.persistence.criteria.*;
 import lombok.Builder;
 import lombok.Data;
@@ -14,10 +15,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
 import java.time.format.DateTimeParseException;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.TimeZone;
+import java.util.*;
 
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
@@ -50,18 +48,13 @@ public class OrderSpecification implements Specification<Order> {
         } catch (Exception e) {
             throw new NotValidInputException("Not correct date input " + startDate);
         }
-        Predicate statusPre = statusPredicate(root, criteriaBuilder);
         Predicate orderSumPre = orderSum(root, criteriaBuilder);
         Predicate userIdPre = ofNullable(userId).map(b -> equals(criteriaBuilder, root.get("userId"), userId))
                 .orElse(null);
-        if (nonNull(statusPre)) {
-            query.distinct(true);
-        }
 
         List<Predicate> predicates = new ArrayList<>();
 
         ofNullable(creationDatePre).ifPresent(predicates::add);
-        ofNullable(statusPre).ifPresent(predicates::add);
         ofNullable(orderSumPre).ifPresent(predicates::add);
         ofNullable(userIdPre).ifPresent(predicates::add);
 
@@ -96,17 +89,6 @@ public class OrderSpecification implements Specification<Order> {
                     lessThanOrEqualsTo(cb, root.get("createdAt"), stringToLocalDateTime(endDate))
             );
         }
-    }
-
-    private Predicate statusPredicate(Root<Order> root, CriteriaBuilder cb) {
-        if (isAllBlank(status)) {
-            return null;
-        }
-
-        Join<Order, OrderStatusHistory> statusHistoryJoin = root.join("trackStatuses", JoinType.INNER);
-        Join<OrderStatusHistory, OrderStatus> statusJoin = statusHistoryJoin.join("status", JoinType.INNER);
-        return cb.and(
-                like(cb, statusJoin.get("statusName"), status));
     }
 
     private Predicate between(CriteriaBuilder cb, Path<LocalDateTime> field, LocalDateTime start, LocalDateTime end) {
