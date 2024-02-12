@@ -16,5 +16,5 @@ public class OrdersPageDTO {
     private long offset;
     private int limit;
     private int totalPages;
-    private long totalProducts;
+    private long totalOrders;
 }

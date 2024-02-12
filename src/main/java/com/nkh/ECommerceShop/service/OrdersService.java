@@ -8,14 +8,19 @@ import com.nkh.ECommerceShop.model.order.Order;
 import com.nkh.ECommerceShop.model.order.OrderStatus;
 import com.nkh.ECommerceShop.model.order.OrderStatusHistory;
 import com.nkh.ECommerceShop.repository.*;
+import com.nkh.ECommerceShop.search.OrderSpecification;
 import com.nkh.ECommerceShop.security.service.UserDetailsServiceImpl;
 import jakarta.transaction.Transactional;
+import org.aspectj.weaver.ast.Or;
 import org.springframework.data.domain.Page;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+
+import java.time.LocalDateTime;
 
 @Service
 public class OrdersService {
@@ -36,24 +41,19 @@ public class OrdersService {
         this.usersService = userDetailsService;
     }
 
-    public Page<Order> getMyOrders(int page, int size){
+    public Page<Order> getAllOrders(int page, int size, String startDate, String endDate, String status, Integer orderSum, Long userId){
         Pageable pageable = PageRequest.of(page, size);
-        Page<Order> orders = ordersRepository
-                .findAllByUserId(usersService.getCurrentUserId(), pageable);
+        Specification<Order> spec = OrderSpecification.builder()
+                .startDate(startDate)
+                .endDate(endDate)
+                .status(status)
+                .orderSum(orderSum)
+                .userId((userId))
+                .build();
+        Page<Order> orders = ordersRepository.findAll(spec, pageable);
         if(orders.isEmpty()){
             throw new ResourceNotFoundException(
-                    String.format("Page %d not found. Products has %d pages",
-                            orders.getPageable().getPageNumber(), orders.getTotalPages()));
-        }
-        return orders;
-    }
-
-    public Page<Order> getAllOrders(int page, int size){
-        Pageable pageable = PageRequest.of(page, size);
-        Page<Order> orders = ordersRepository.findAll(pageable);
-        if(orders.isEmpty()){
-            throw new ResourceNotFoundException(
-                    String.format("Page %d not found. Products has %d pages",
+                    String.format("Page not found. Orders has %d pages",
                             orders.getPageable().getPageNumber(), orders.getTotalPages()));
         }
         return orders;

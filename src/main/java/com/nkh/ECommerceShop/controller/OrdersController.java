@@ -5,23 +5,25 @@ import com.nkh.ECommerceShop.dto.OrderDTO;
 import com.nkh.ECommerceShop.dto.OrdersPageDTO;
 import com.nkh.ECommerceShop.model.order.Order;
 import com.nkh.ECommerceShop.model.order.OrderStatusHistory;
+import com.nkh.ECommerceShop.security.service.UserDetailsServiceImpl;
 import com.nkh.ECommerceShop.service.OrdersService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.Set;
 
 @RestController
 @RequestMapping("/api/v1/orders")
 public class OrdersController {
     private final OrdersService ordersService;
+    private final UserDetailsServiceImpl usersService;
 
     @Autowired
-    public OrdersController(OrdersService ordersService) {
+    public OrdersController(OrdersService ordersService, UserDetailsServiceImpl usersService) {
         this.ordersService = ordersService;
+        this.usersService = usersService;
     }
 
     @PostMapping("/process/mycart")
@@ -69,28 +71,40 @@ public class OrdersController {
     @GetMapping("/my")
     @PreAuthorize("hasAnyRole('USER')")
     public ResponseEntity<OrdersPageDTO> getMyOrders(@RequestParam("page") int page,
-                                                      @RequestParam("size") int size){
-        Page<Order> orders = ordersService.getMyOrders(page, size);
+                                                     @RequestParam("size") int size,
+                                                     @RequestParam(value = "startDate", required = false) String startDate,
+                                                     @RequestParam(value = "endDate", required = false) String endDate,
+                                                     @RequestParam(value = "orderSum", required = false) Integer orderSum,
+                                                     @RequestParam(value = "status",required = false) String status){
+        long currentUserId = usersService.getCurrentUserId();
+        Page<Order> orders = ordersService.getAllOrders(page, size, startDate, endDate, status,orderSum, currentUserId);
         OrdersPageDTO ordersPage = new OrdersPageDTO();
         ordersPage.setOrders(orders.getContent());
         ordersPage.setTotalPages(orders.getTotalPages());
         ordersPage.setOffset(orders.getPageable().getOffset());
         ordersPage.setLimit(size);
         ordersPage.setCurrentPage(orders.getPageable().getPageNumber());
+        ordersPage.setTotalOrders(orders.getNumberOfElements());
         return ResponseEntity.ok().body(ordersPage);
     }
 
     @GetMapping
     @PreAuthorize("hasAnyRole('ADMIN')")
     public ResponseEntity<OrdersPageDTO> getAllOrders(@RequestParam("page") int page,
-                                                     @RequestParam("size") int size){
-        Page<Order> orders = ordersService.getAllOrders(page, size);
+                                                      @RequestParam("size") int size,
+                                                      @RequestParam(value = "startDate", required = false) String startDate,
+                                                      @RequestParam(value = "endDate", required = false) String endDate,
+                                                      @RequestParam(value = "orderSum", required = false) Integer orderSum,
+                                                      @RequestParam(value = "userId", required = false) Long userId,
+                                                      @RequestParam(value = "status",required = false) String status){
+        Page<Order> orders = ordersService.getAllOrders(page, size, startDate, endDate, status,orderSum, userId);
         OrdersPageDTO ordersPage = new OrdersPageDTO();
         ordersPage.setOrders(orders.getContent());
         ordersPage.setTotalPages(orders.getTotalPages());
         ordersPage.setOffset(orders.getPageable().getOffset());
         ordersPage.setLimit(size);
         ordersPage.setCurrentPage(orders.getPageable().getPageNumber());
+        ordersPage.setTotalOrders(orders.getTotalElements());
         return ResponseEntity.ok().body(ordersPage);
     }
 }
