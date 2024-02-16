@@ -52,9 +52,13 @@ public class ProductsController {
     @GetMapping
     @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
     public ResponseEntity<ProductsPageDTO> getProducts(@RequestParam(defaultValue = "0") int page,
-                                                     @RequestParam(defaultValue = "3") int size){
+                                                       @RequestParam(defaultValue = "3") int size,
+                                                       @RequestParam("productName") String productName,
+                                                       @RequestParam("startPrice") double startPrice,
+                                                       @RequestParam("endPrice") double endPrice,
+                                                       @RequestParam("productQuantity") int productQuantity){
         ProductsPageDTO productsResponse = new ProductsPageDTO();
-        Page<Product> products = productsService.getAllProducts(page,size);
+        Page<Product> products = productsService.getAllProducts(page,size,productName,startPrice,endPrice,productQuantity);
         productsResponse.setProducts(products.getContent());
         productsResponse.setLimit(size);
         productsResponse.setTotalPages(products.getTotalPages());

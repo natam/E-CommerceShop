@@ -3,12 +3,16 @@ package com.nkh.ECommerceShop.service;
 import com.nkh.ECommerceShop.exception.AlreadyExistsException;
 import com.nkh.ECommerceShop.exception.ResourceNotFoundException;
 import com.nkh.ECommerceShop.model.Product;
+import com.nkh.ECommerceShop.model.order.Order;
 import com.nkh.ECommerceShop.repository.ProductsRepository;
+import com.nkh.ECommerceShop.search.OrderSpecification;
+import com.nkh.ECommerceShop.search.ProductSpecification;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -48,9 +52,15 @@ public class ProductsService {
         return true;
     }
 
-    public Page<Product> getAllProducts(int page, int size){
+    public Page<Product> getAllProducts(int page, int size, String productName, double priceStartRange, double priceEndRange, int productQuantity){
         Pageable pageable = PageRequest.of(page, size);
-        Page<Product> products = repository.findAll(pageable);
+        Specification<Product> spec = ProductSpecification.builder()
+                .name(productName)
+                .priceStart(priceStartRange)
+                .priceEnd(priceEndRange)
+                .stockAvailability(productQuantity)
+                .build();
+        Page<Product> products = repository.findAll(spec, pageable);
         if(products.isEmpty()){
             throw new ResourceNotFoundException(
                     String.format("Page %d not found. Products has %d pages",

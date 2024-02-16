@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
 
 @Entity
 @Data
-@Table(name = "refresh_token",
+@Table(name = "refreshToken",
         uniqueConstraints = {
                 @UniqueConstraint(columnNames = "token")
         })
