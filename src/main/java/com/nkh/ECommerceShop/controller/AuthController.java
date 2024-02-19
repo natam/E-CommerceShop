@@ -70,6 +70,7 @@ public class AuthController {
                 .map(GrantedAuthority::getAuthority)
                 .toList();
 
+        refreshTokenService.deleteAllByUserId(userDetails.getId());
         RefreshToken refreshToken = refreshTokenService.createRefreshToken(userDetails.getId());
         AccessTokenDTO responseBody = new AccessTokenDTO(userDetails.getUsername(), roles, jwtCookie.getValue(), refreshToken.getToken(), jwtCookie.getMaxAge().toString());
 
