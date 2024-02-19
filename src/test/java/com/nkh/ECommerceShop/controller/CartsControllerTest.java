@@ -124,8 +124,10 @@ class CartsControllerTest {
         product1.setId(1);
         Cart cart = new Cart(1);
         cart.setId(3);
-        CartProduct cartProduct1 = new CartProduct(0, product1, 1);
-        CartProduct cartProduct2 = new CartProduct(0, product2, 2);
+        CartProduct cartProduct1 = new CartProduct(3, product1, 1);
+        cartProduct1.setId(1);
+        CartProduct cartProduct2 = new CartProduct(3, product2, 2);
+        cartProduct2.setId(2);
         cart.getCartProducts().add(cartProduct1);
         cart.getCartProducts().add(cartProduct2);
         double totalPrice = product2.getPrice()*2 + product1.getPrice();
