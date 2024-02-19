@@ -5,6 +5,7 @@ import com.nkh.ECommerceShop.exception.AlreadyExistsException;
 import com.nkh.ECommerceShop.exception.ResourceNotFoundException;
 import com.nkh.ECommerceShop.model.Product;
 import com.nkh.ECommerceShop.repository.ProductsRepository;
+import com.nkh.ECommerceShop.search.ProductSpecification;
 import com.nkh.ECommerceShop.security.WebSecurityConfig;
 import com.nkh.ECommerceShop.security.jwt.AuthEntryPointJwt;
 import com.nkh.ECommerceShop.security.jwt.AuthTokenFilter;
@@ -23,6 +24,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.test.context.support.WithMockUser;
@@ -261,7 +263,7 @@ class ProductsControllerTest {
         List<Product> content = new ArrayList<>();
         content.add(product);
         Page<Product> products = new PageImpl<>(content, PageRequest.of(0,4),1);
-        given(productsService.getAllProducts(0,4)).willReturn(products);
+        given(productsService.getAllProducts(0,4, null, 0, 0, 0)).willReturn(products);
         mvc.perform(
                         get("/api/v1/products?page=0&size=4")
                                 .accept(MediaType.APPLICATION_JSON))
@@ -275,7 +277,7 @@ class ProductsControllerTest {
     @WithMockUser(authorities = "ADMIN")
     void givenRequestedPageNumberThatIsEmpty_ReturnError() throws Exception {
         String errorMessage = "Page 2 not found. Products has 1 pages";
-        given(productsService.getAllProducts(2,4)).willThrow(new ResourceNotFoundException(errorMessage));
+        given(productsService.getAllProducts(2,4, null, 0, 0, 0)).willThrow(new ResourceNotFoundException(errorMessage));
         mvc.perform(
                         get("/api/v1/products?page=2&size=4")
                                 .accept(MediaType.APPLICATION_JSON))

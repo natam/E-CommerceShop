@@ -53,10 +53,10 @@ public class ProductsController {
     @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
     public ResponseEntity<ProductsPageDTO> getProducts(@RequestParam(defaultValue = "0") int page,
                                                        @RequestParam(defaultValue = "3") int size,
-                                                       @RequestParam("productName") String productName,
-                                                       @RequestParam("startPrice") double startPrice,
-                                                       @RequestParam("endPrice") double endPrice,
-                                                       @RequestParam("productQuantity") int productQuantity){
+                                                       @RequestParam(value = "productName", required = false) String productName,
+                                                       @RequestParam(value = "startPrice", required = false, defaultValue = "0") double startPrice,
+                                                       @RequestParam(value = "endPrice", required = false, defaultValue = "0") double endPrice,
+                                                       @RequestParam(value = "productQuantity", required = false, defaultValue = "0") int productQuantity){
         ProductsPageDTO productsResponse = new ProductsPageDTO();
         Page<Product> products = productsService.getAllProducts(page,size,productName,startPrice,endPrice,productQuantity);
         productsResponse.setProducts(products.getContent());

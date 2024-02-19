@@ -58,11 +58,13 @@ public class ProductSpecification implements Specification<Product> {
     private Predicate priceRangePredicate(Root<Product> root, CriteriaBuilder cb){
         if (isNull(priceStart)&isNull(priceEnd)) {
             return null;
-        }else if(nonNull(priceStart)&nonNull(priceEnd)){
+        }else if(priceStart<=0&priceEnd<=0){
+            return null;
+        }else if(priceStart>0&priceEnd>0){
             return cb.and(
                     between(cb, root.get("price"), priceStart, priceEnd)
             );
-        }else if(nonNull(priceStart)){
+        }else if(priceStart>0){
             return cb.and(
                     greaterThanOrEqualTo(cb, root.get("price"), priceStart)
             );
