@@ -30,11 +30,11 @@ jobs:
       - uses: google-github-actions/setup-gcloud@main
         with:
           service_account_key: ${{ secrets.SERVICE_ACCOUNT_KEY }}
-          project_id: ${{ env.PROJECT_ID }}
+          project_id: ${{ vars.PROJECT_ID }}
           export_default_credentials: true
 
       - name: Build Docker Image
-        run: docker buildx build -t ${{env.IMAGE_NAME}}:latest --platform linux/x86_64 .
+        run: docker buildx build -t ${{vars.IMAGE_NAME}}:latest --platform linux/x86_64 .
 
       - name: Automatic Tagging of Releases
         id: increment-git-tag
@@ -44,13 +44,13 @@ jobs:
       - name: Configure Docker Client
         run: |-
           gcloud auth configure-docker --quiet
-          gcloud auth configure-docker ${{env.GAR_LOCATION}}-docker.pkg.dev --quiet
+          gcloud auth configure-docker ${{vars.GAR_LOCATION}}-docker.pkg.dev --quiet
 
       - name: Push Docker Image to Artifact Registry
         env:
           GIT_TAG: ${{ steps.increment-git-tag.outputs.git-tag }}
         run: |-
-          docker tag ${{env.IMAGE_NAME}}:latest ${{env.GAR_LOCATION}}-docker.pkg.dev/${{ env.PROJECT_ID }}/nkh-startsteps/ecommerce/${{env.IMAGE_NAME}}:latest
-          docker tag ${{env.IMAGE_NAME}}:latest ${{env.GAR_LOCATION}}-docker.pkg.dev/${{ env.PROJECT_ID }}/nkh-startsteps/ecommerce/${{env.IMAGE_NAME}}:$GIT_TAG
-          docker push ${{env.GAR_LOCATION}}-docker.pkg.dev/${{ env.PROJECT_ID }}/nkh-startsteps/ecommerce/${{env.IMAGE_NAME}}:latest
-          docker push ${{env.GAR_LOCATION}}-docker.pkg.dev/${{ env.PROJECT_ID }}/nkh-startsteps/ecommerce/${{env.IMAGE_NAME}}:$GIT_TAG
+          docker tag ${{vars.IMAGE_NAME}}:latest ${{vars.GAR_LOCATION}}-docker.pkg.dev/${{ vars.PROJECT_ID }}/nkh-startsteps/ecommerce/${{vars.IMAGE_NAME}}:latest
+          docker tag ${{vars.IMAGE_NAME}}:latest ${{vars.GAR_LOCATION}}-docker.pkg.dev/${{ vars.PROJECT_ID }}/nkh-startsteps/ecommerce/${{vars.IMAGE_NAME}}:$GIT_TAG
+          docker push ${{vars.GAR_LOCATION}}-docker.pkg.dev/${{ vars.PROJECT_ID }}/nkh-startsteps/ecommerce/${{vars.IMAGE_NAME}}:latest
+          docker push ${{vars.GAR_LOCATION}}-docker.pkg.dev/${{ vars.PROJECT_ID }}/nkh-startsteps/ecommerce/${{vars.IMAGE_NAME}}:$GIT_TAG
