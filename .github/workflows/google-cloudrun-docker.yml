@@ -55,8 +55,8 @@ jobs:
 
       - name: Inspect image
         run: |
-          docker pull ${{ vars.IMAGE_NAME }}:${{ steps.meta.outputs.version }}
-          docker image inspect ${{ vars.IMAGE_NAME}}:${{ steps.meta.outputs.version }}    
+          docker pull pkg.dev/${{ vars.IMAGE_NAME }}:${{ steps.meta.outputs.version }}
+          docker image inspect pkg.dev/${{ vars.IMAGE_NAME}}:${{ steps.meta.outputs.version }}    
 
       - name: Automatic Tagging of Releases
         id: increment-git-tag
