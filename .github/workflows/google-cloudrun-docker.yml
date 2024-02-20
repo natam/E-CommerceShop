@@ -46,10 +46,12 @@ jobs:
         with:
           context: .
           file: ./Dockerfile
-          tags: ${{vars.IMAGE_NAME}}:latest
+          tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           platforms: linux/x86_64
           builder: ${{ steps.buildx.outputs.name }}
+          cache-from: type=registry,ref=${{ env.REGISTRY_SLUG || inputs.slug }}:master
+          cache-to: type=inline
 
       - name: Automatic Tagging of Releases
         id: increment-git-tag
@@ -71,7 +73,7 @@ jobs:
         env:
           GIT_TAG: ${{ steps.increment-git-tag.outputs.git-tag }}
         run: |-
-          docker tag ${{vars.IMAGE_NAME}}:latest ${{vars.GAR_LOCATION}}-docker.pkg.dev/${{ vars.PROJECT_ID }}/nkh-startsteps/ecommerce/${{vars.IMAGE_NAME}}:latest
-          docker tag ${{vars.IMAGE_NAME}} ${{vars.GAR_LOCATION}}-docker.pkg.dev/${{ vars.PROJECT_ID }}/nkh-startsteps/ecommerce/${{vars.IMAGE_NAME}}:$GIT_TAG
-          docker push ${{vars.GAR_LOCATION}}-docker.pkg.dev/${{ vars.PROJECT_ID }}/nkh-startsteps/ecommerce/${{vars.IMAGE_NAME}}:latest
+          docker tag ${{vars.IMAGE_NAME}}:${{ steps.meta.outputs.version }} ${{vars.GAR_LOCATION}}-docker.pkg.dev/${{ vars.PROJECT_ID }}/nkh-startsteps/ecommerce/${{vars.IMAGE_NAME}}:${{ steps.meta.outputs.version }}
+          docker tag ${{vars.IMAGE_NAME}}:${{ steps.meta.outputs.version }} ${{vars.GAR_LOCATION}}-docker.pkg.dev/${{ vars.PROJECT_ID }}/nkh-startsteps/ecommerce/${{vars.IMAGE_NAME}}:$GIT_TAG
+          docker push ${{vars.GAR_LOCATION}}-docker.pkg.dev/${{ vars.PROJECT_ID }}/nkh-startsteps/ecommerce/${{vars.IMAGE_NAME}}:${{ steps.meta.outputs.version }}
           docker push ${{vars.GAR_LOCATION}}-docker.pkg.dev/${{ vars.PROJECT_ID }}/nkh-startsteps/ecommerce/${{vars.IMAGE_NAME}}:$GIT_TAG
