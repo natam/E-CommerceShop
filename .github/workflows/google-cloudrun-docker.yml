@@ -42,14 +42,14 @@ jobs:
           flavor: latest=true
 
       - name: Build Docker Image
+        uses: docker/build-push-action@v5
         with:
           context: .
           file: ./Dockerfile
-          tags: ${{ steps.meta.outputs.tags }}
+          tags: ${{vars.IMAGE_NAME}}:latest
           labels: ${{ steps.meta.outputs.labels }}
           platforms: linux/x86_64
           builder: ${{ steps.buildx.outputs.name }}
-        uses: docker/build-push-action@v5
 
       - name: Automatic Tagging of Releases
         id: increment-git-tag
