@@ -45,7 +45,8 @@ jobs:
         with:
           context: ./
           file: ./Dockerfile
-          tags: ${{vars.IMAGE_NAME}}:latest
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
           platforms: linux/x86_64
           builder: ${{ steps.buildx.outputs.name }}
         uses: docker/build-push-action@v2
