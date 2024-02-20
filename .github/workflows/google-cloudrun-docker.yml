@@ -73,7 +73,7 @@ jobs:
         env:
           GIT_TAG: ${{ steps.increment-git-tag.outputs.git-tag }}
         run: |-
-          docker tag nkh1010/${{vars.IMAGE_NAME}}:latest ${{vars.GAR_LOCATION}}-docker.pkg.dev/${{ vars.PROJECT_ID }}/nkh-startsteps/ecommerce/${{vars.IMAGE_NAME}}:latest
-          docker tag nkh1010/${{vars.IMAGE_NAME}}:latest ${{vars.GAR_LOCATION}}-docker.pkg.dev/${{ vars.PROJECT_ID }}/nkh-startsteps/ecommerce/${{vars.IMAGE_NAME}}:$GIT_TAG
-          docker push ${{vars.GAR_LOCATION}}-docker.pkg.dev/${{ vars.PROJECT_ID }}/nkh-startsteps/ecommerce/${{vars.IMAGE_NAME}}:latest
-          docker push ${{vars.GAR_LOCATION}}-docker.pkg.dev/${{ vars.PROJECT_ID }}/nkh-startsteps/ecommerce/${{vars.IMAGE_NAME}}:$GIT_TAG
+          docker tag nkh1010/${{vars.IMAGE_NAME}}:latest ${{vars.GAR_LOCATION}}-docker.pkg.dev/${{ vars.PROJECT_ID }}/nkh-startsteps/ecommerce:latest
+          docker tag nkh1010/${{vars.IMAGE_NAME}}:latest ${{vars.GAR_LOCATION}}-docker.pkg.dev/${{ vars.PROJECT_ID }}/nkh-startsteps/ecommerce:$GIT_TAG
+          docker push ${{vars.GAR_LOCATION}}-docker.pkg.dev/${{ vars.PROJECT_ID }}/nkh-startsteps/ecommerce:latest
+          docker push ${{vars.GAR_LOCATION}}-docker.pkg.dev/${{ vars.PROJECT_ID }}/nkh-startsteps/ecommerce:$GIT_TAG
