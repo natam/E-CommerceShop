@@ -34,20 +34,13 @@ jobs:
           project_id: ${{ vars.PROJECT_ID }}
           export_default_credentials: true
 
-      - name: Docker meta
-        id: meta
-        uses: docker/metadata-action@v4
-        with:
-          images: pkg.dev/${{vars.IMAGE_NAME}}
-          flavor: latest=true
-
       - name: Build Docker Image
         uses: docker/build-push-action@v5
         with:
           context: .
           file: ./Dockerfile
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
+          push: true
+          tags: nkh1010/${{ vars.IMAGE_NAME }}:latest
           platforms: linux/x86_64
           builder: ${{ steps.buildx.outputs.name }}
           cache-from: type=registry,ref=${{ vars.IMAGE_NAME }}:master
@@ -55,8 +48,8 @@ jobs:
 
       - name: Inspect image
         run: |
-          docker pull pkg.dev/${{ vars.IMAGE_NAME }}:${{ steps.meta.outputs.version }}
-          docker image inspect pkg.dev/${{ vars.IMAGE_NAME}}:${{ steps.meta.outputs.version }}    
+          docker pull nkh1010/${{ vars.IMAGE_NAME }}:${{ steps.meta.outputs.version }}
+          docker image inspect nkh1010/${{ vars.IMAGE_NAME}}:${{ steps.meta.outputs.version }}    
 
       - name: Automatic Tagging of Releases
         id: increment-git-tag
@@ -78,7 +71,7 @@ jobs:
         env:
           GIT_TAG: ${{ steps.increment-git-tag.outputs.git-tag }}
         run: |-
-          docker tag pkg.dev/${{vars.IMAGE_NAME}}:${{ steps.meta.outputs.version }} ${{vars.GAR_LOCATION}}-docker.pkg.dev/${{ vars.PROJECT_ID }}/nkh-startsteps/ecommerce/${{vars.IMAGE_NAME}}:${{ steps.meta.outputs.version }}
-          docker tag pkg.dev/${{vars.IMAGE_NAME}}:${{ steps.meta.outputs.version }} ${{vars.GAR_LOCATION}}-docker.pkg.dev/${{ vars.PROJECT_ID }}/nkh-startsteps/ecommerce/${{vars.IMAGE_NAME}}:$GIT_TAG
+          docker tag nkh1010/${{vars.IMAGE_NAME}}:${{ steps.meta.outputs.version }} ${{vars.GAR_LOCATION}}-docker.pkg.dev/${{ vars.PROJECT_ID }}/nkh-startsteps/ecommerce/${{vars.IMAGE_NAME}}:${{ steps.meta.outputs.version }}
+          docker tag nkh1010/${{vars.IMAGE_NAME}}:${{ steps.meta.outputs.version }} ${{vars.GAR_LOCATION}}-docker.pkg.dev/${{ vars.PROJECT_ID }}/nkh-startsteps/ecommerce/${{vars.IMAGE_NAME}}:$GIT_TAG
           docker push ${{vars.GAR_LOCATION}}-docker.pkg.dev/${{ vars.PROJECT_ID }}/nkh-startsteps/ecommerce/${{vars.IMAGE_NAME}}:${{ steps.meta.outputs.version }}
           docker push ${{vars.GAR_LOCATION}}-docker.pkg.dev/${{ vars.PROJECT_ID }}/nkh-startsteps/ecommerce/${{vars.IMAGE_NAME}}:$GIT_TAG
