@@ -80,4 +80,4 @@ jobs:
 
       - name: Update service with new image
         run: |-
-          gcloud run deploy ecommerce --image ${{vars.GAR_LOCATION}}-docker.pkg.dev/${{ vars.PROJECT_ID }}/nkh-startsteps/ecommerce:latest
+          gcloud run deploy ecommerce --image ${{vars.GAR_LOCATION}}-docker.pkg.dev/${{ vars.PROJECT_ID }}/nkh-startsteps/ecommerce:latest --region ${{vars.GAR_LOCATION}}
