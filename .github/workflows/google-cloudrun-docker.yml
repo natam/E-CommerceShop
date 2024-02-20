@@ -50,8 +50,13 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           platforms: linux/x86_64
           builder: ${{ steps.buildx.outputs.name }}
-          cache-from: type=registry,ref=${{ env.REGISTRY_SLUG || inputs.slug }}:master
+          cache-from: type=registry,ref=${{ vars.IMAGE_NAME }}:master
           cache-to: type=inline
+
+      - name: Inspect image
+        run: |
+          docker pull ${{ vars.IMAGE_NAME }}:${{ steps.meta.outputs.version }}
+          docker image inspect ${{ vars.IMAGE_NAME}}:${{ steps.meta.outputs.version }}    
 
       - name: Automatic Tagging of Releases
         id: increment-git-tag
