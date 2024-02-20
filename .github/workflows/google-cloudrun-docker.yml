@@ -77,3 +77,7 @@ jobs:
           docker tag nkh1010/${{vars.IMAGE_NAME}}:latest ${{vars.GAR_LOCATION}}-docker.pkg.dev/${{ vars.PROJECT_ID }}/nkh-startsteps/ecommerce:$GIT_TAG
           docker push ${{vars.GAR_LOCATION}}-docker.pkg.dev/${{ vars.PROJECT_ID }}/nkh-startsteps/ecommerce:latest
           docker push ${{vars.GAR_LOCATION}}-docker.pkg.dev/${{ vars.PROJECT_ID }}/nkh-startsteps/ecommerce:$GIT_TAG
+
+      - name: Update service with new image
+        run: |-
+          gcloud run deploy ecommerce --image ${{vars.GAR_LOCATION}}-docker.pkg.dev/${{ vars.PROJECT_ID }}/nkh-startsteps/ecommerce:latest
