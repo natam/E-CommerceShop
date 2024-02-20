@@ -45,8 +45,7 @@ jobs:
         with:
           context: ./
           file: ./Dockerfile
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
+          tags: latest
           platforms: linux/x86_64
           builder: ${{ steps.buildx.outputs.name }}
         uses: docker/build-push-action@v2
@@ -65,7 +64,7 @@ jobs:
         env:
           GIT_TAG: ${{ steps.increment-git-tag.outputs.git-tag }}
         run: |-
-          docker tag ${{vars.IMAGE_NAME}} ${{vars.GAR_LOCATION}}-docker.pkg.dev/${{ vars.PROJECT_ID }}/nkh-startsteps/ecommerce
+          docker tag ${{vars.IMAGE_NAME}}:latest ${{vars.GAR_LOCATION}}-docker.pkg.dev/${{ vars.PROJECT_ID }}/nkh-startsteps/ecommerce${{vars.IMAGE_NAME}}:latest
           docker tag ${{vars.IMAGE_NAME}} ${{vars.GAR_LOCATION}}-docker.pkg.dev/${{ vars.PROJECT_ID }}/nkh-startsteps/ecommerce/${{vars.IMAGE_NAME}}:$GIT_TAG
           docker push ${{vars.GAR_LOCATION}}-docker.pkg.dev/${{ vars.PROJECT_ID }}/nkh-startsteps/ecommerce
           docker push ${{vars.GAR_LOCATION}}-docker.pkg.dev/${{ vars.PROJECT_ID }}/nkh-startsteps/ecommerce/${{vars.IMAGE_NAME}}:$GIT_TAG
