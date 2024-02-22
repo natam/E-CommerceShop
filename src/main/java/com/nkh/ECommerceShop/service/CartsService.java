@@ -75,7 +75,7 @@ public class CartsService {
         if (foundCartProduct.isPresent()) {
             //if product's quantity in cart is 1 -> remove this product, otherwise decrease its quantity in cart on 1
             if(foundCartProduct.get().getProductQuantity()==1){
-                cartsProductsRepository.deleteByCartIdAndProduct(myCart.getId(), product);
+                cartsProductsRepository.deleteByCartIdAndProduct(myCart.getId(), product.getId());
             }else {
                 foundCartProduct.get()
                         .setProductQuantity(foundCartProduct.get()
@@ -96,7 +96,7 @@ public class CartsService {
         if (foundCartProduct.isPresent()) {
             double removedProductPrice = foundCartProduct.get().getProductQuantity()*product.getPrice();
             myCart.setTotalCartProductsPrice(myCart.getTotalCartProductsPrice() - removedProductPrice);
-            cartsProductsRepository.deleteByCartIdAndProduct(myCart.getId(), product);
+            cartsProductsRepository.deleteByCartIdAndProduct(myCart.getId(), product.getId());
         } else {
             throw new ResourceNotFoundException(String.format("Product with id %d is not found in cart", productId));
         }

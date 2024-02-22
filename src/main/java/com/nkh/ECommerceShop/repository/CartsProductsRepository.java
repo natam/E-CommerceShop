@@ -13,5 +13,8 @@ public interface CartsProductsRepository extends JpaRepository<CartProduct, Long
     @Transactional
     @Query(value="delete from cartProducts where cartId=?1", nativeQuery = true)
     void deleteAllProductsByCartId(long cartId);
-    void deleteByCartIdAndProduct(long cartId, Product product);
+    @Modifying
+    @Transactional
+    @Query(value="delete from cartProducts where cartId=?1 and productId=?2", nativeQuery = true)
+    void deleteByCartIdAndProduct(long cartId, long productId);
 }
