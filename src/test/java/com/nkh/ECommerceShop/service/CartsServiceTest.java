@@ -206,7 +206,7 @@ class CartsServiceTest {
             Mockito.doAnswer(i -> {
                 userCart.getCartProducts().remove(cartProduct);
                 return null;
-            }).when(cartsProductsRepository).deleteByCartIdAndProduct(userCart.getId(), product1);
+            }).when(cartsProductsRepository).deleteByCartIdAndProduct(userCart.getId(), productId);
             cartsService.reduceProductQuantityInCart(productId);
             assertEquals(0, userCart.getCartProducts().size());
             assertEquals(0, userCart.getTotalCartProductsPrice());
@@ -242,7 +242,7 @@ class CartsServiceTest {
             Mockito.doAnswer(i -> {
                 userCart.getCartProducts().remove(cartProduct2);
                 return null;
-            }).when(cartsProductsRepository).deleteByCartIdAndProduct(userCart.getId(), product2);
+            }).when(cartsProductsRepository).deleteByCartIdAndProduct(userCart.getId(), product2Id);
             Mockito.when(cartsRepository.findByUserId(userId)).thenReturn(Optional.of(userCart));
             cartsService.deleteProductFromCart(product2Id);
             assertEquals(1, userCart.getCartProducts().size());
